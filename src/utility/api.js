@@ -38,7 +38,9 @@ export function post(url, payload) {
     });
 }
 
-export default {
+const index = {
   get,
   post,
 };
+
+export default index;

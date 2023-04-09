@@ -26,10 +26,10 @@ function App() {
       </div>
       {schedule.length ? (
         schedule.map((data, index) => {
-          const hideDate = schedule[index - 1]?.date == data?.date;
+          const hideDate = schedule[index - 1]?.date === data?.date;
           return (
             <>
-              {index != 0 && !hideDate && <br />}
+              {index !== 0 && !hideDate && <br />}
               <div key={data.stockNo}>
                 <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>
                   {hideDate ? '' : data.date}
