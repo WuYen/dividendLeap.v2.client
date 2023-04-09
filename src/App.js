@@ -1,66 +1,54 @@
-// import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
+import api from './utility/api';
 
 function App() {
   const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
-      const data = await get('https://jolly-bee-garment.cyclic.app/stock/list');
+      const data = await api.get('/stock/list');
       console.log('fetch data', data);
       setSchedule(data.schedule);
     }
     fetchData();
     return () => {};
-  }, [setSchedule]);
+  }, []);
 
   return (
     <div className='App'>
+      <div>
+        <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>日期</div>
+        <div style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}>名稱</div>
+        <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>股價</div>
+        <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>現金股利</div>
+        <div style={{ minWidth: '50px', display: 'inline-block', textAlign: 'right' }}>殖利率</div>
+      </div>
       {schedule.length ? (
-        schedule
-          .sort(({ date: a }, { date: b }) => {
-            if (a < b) {
-              return -1;
-            }
-            if (a > b) {
-              return 1;
-            }
-            return 0;
-          })
-          .map((data, index) => {
-            const formattedDate = `${data.date.slice(0, 4)}-${data.date.slice(4, 6)}-${data.date.slice(6)}`;
-            return (
+        schedule.map((data, index) => {
+          const hideDate = schedule[index - 1]?.date == data?.date;
+          return (
+            <>
+              {index != 0 && !hideDate && <br />}
               <div key={data.stockNo}>
-                <div style={{ minWidth: '100px', display: 'inline-block' }}>{formattedDate}</div>
-                <div style={{ minWidth: '100px', display: 'inline-block' }}>{data.stockName}</div>
-                <div style={{ minWidth: '50px', display: 'inline-block' }}>{data.stockNo}</div>
-                <div style={{ minWidth: '50px', display: 'inline-block' }}>{data.cashDividen.toFixed(2)}</div>
+                <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>
+                  {hideDate ? '' : data.date}
+                </div>
+                <div
+                  style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}
+                >{`(${data.stockNo})${data.stockName}`}</div>
+                <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.price}</div>
+                <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.cashDividen}</div>
+                <div style={{ minWidth: '50px', display: 'inline-block', textAlign: 'right' }}>{data.yieldRatio}</div>
               </div>
-            );
-          })
+            </>
+          );
+        })
       ) : (
         <div>Empty</div>
       )}
     </div>
   );
-}
-
-function get(url) {
-  return fetch(url, {
-    method: 'GET',
-    // headers: headers(),
-  })
-    .then((res) => res.json())
-    .catch((error) => {
-      console.log('error', error);
-      return {
-        success: false,
-        data: null,
-        error: error.name,
-        message: error.message,
-      };
-    });
 }
 
 export default App;
