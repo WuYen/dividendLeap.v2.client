@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import api from './utility/api';
-import List from './component/List';
+// import List from './component/List';
 
 function App() {
   const [schedule, setSchedule] = useState([]);
