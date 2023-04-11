@@ -1,52 +1,143 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import api from './utility/api';
+import List from './component/List';
 
 function App() {
   const [schedule, setSchedule] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
       const data = await api.get('/stock/list');
       console.log('fetch data', data);
       setSchedule(data.schedule);
+      setIsLoading(false);
     }
     fetchData();
     return () => {};
   }, []);
-
+  // return (
+  //   <List
+  //     data={[
+  //       {
+  //         column1: 'column1-1',
+  //         column2: 'column1-2',
+  //         column3: 'column1-3',
+  //         column4: 'column1-4',
+  //         column5: 'column1-5',
+  //         column6: 'column1-6',
+  //       },
+  //       {
+  //         column1: 'column2-1',
+  //         column2: 'column2-2',
+  //         column3: 'column2-3',
+  //         column4: 'column2-4',
+  //         column5: 'column2-5',
+  //         column6: 'column2-6',
+  //       },
+  //       {
+  //         column1: 'column3-1',
+  //         column2: 'column3-2',
+  //         column3: 'column3-3',
+  //         column4: 'column3-4',
+  //         column5: 'column3-5',
+  //         column6: 'column3-',
+  //       },
+  //     ]}
+  //   ></List>
+  // );
   return (
     <div className='App'>
-      <div>
-        <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>日期</div>
-        <div style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}>名稱</div>
-        <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>股價</div>
-        <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>現金股利</div>
-        <div style={{ minWidth: '50px', display: 'inline-block', textAlign: 'right' }}>殖利率</div>
-      </div>
-      {schedule.length ? (
-        schedule.map((data, index) => {
-          const hideDate = schedule[index - 1]?.date === data?.date;
-          return (
-            <>
-              {index !== 0 && !hideDate && <br />}
-              <div key={data.stockNo}>
-                <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>
-                  {hideDate ? '' : data.date}
-                </div>
-                <div
-                  style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}
-                >{`(${data.stockNo})${data.stockName}`}</div>
-                <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.price}</div>
-                <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.cashDividen}</div>
-                <div style={{ minWidth: '50px', display: 'inline-block', textAlign: 'right' }}>{data.yieldRatio}</div>
-              </div>
-            </>
-          );
-        })
-      ) : (
-        <div>Empty</div>
+      {!isMobile && (
+        <div>
+          <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>日期</div>
+          <div style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}>名稱</div>
+          <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>股價</div>
+          <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>現金股利</div>
+          <div style={{ minWidth: '60px', display: 'inline-block', textAlign: 'right' }}>殖利率</div>
+        </div>
       )}
+      {isLoading ? (
+        <div>Loading</div>
+      ) : schedule.length === 0 ? (
+        <div>Empty</div>
+      ) : (
+        schedule.map((data, index) => {
+          const showDate = schedule[index - 1]?.date !== data?.date;
+          if (isMobile && showDate) {
+            return (
+              <>
+                <div className='text-divider' style={{ margin: '10px 0px' }}>
+                  {data.date}
+                </div>
+                <div>
+                  {!isMobile && (
+                    <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>日期</div>
+                  )}
+                  <div style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}>名稱</div>
+                  <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>股價</div>
+                  <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>現金股利</div>
+                  <div style={{ minWidth: '60px', display: 'inline-block', textAlign: 'right' }}>殖利率</div>
+                </div>
+                <Item data={data} showDate={showDate} isMobile={isMobile} />
+              </>
+            );
+          }
+          return <Item data={data} showDate={showDate} isMobile={isMobile} />;
+        })
+      )}
+      <style jsx>{`
+        .App {
+          margin-bottom: 88px;
+        }
+
+        .text-divider {
+          display: flex;
+          align-items: center;
+        }
+
+        .text-divider::before {
+          content: '';
+          height: 1px;
+          background-color: silver;
+          flex-grow: 1;
+          margin: 0px 10px 0px 28px;
+        }
+
+        .text-divider::after {
+          content: '';
+          height: 1px;
+          background-color: silver;
+          flex-grow: 1;
+          margin: 0px 28px 0px 10px;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Item(props) {
+  const { data, showDate, isMobile } = props;
+  return (
+    <div key={data.stockNo} style={{ margin: '5px 0px' }}>
+      {!isMobile && (
+        <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>{showDate ? data.date : ''}</div>
+      )}
+      <div
+        style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}
+      >{`${data.stockNo} ${data.stockName}`}</div>
+      <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.price}</div>
+      <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.cashDividen}</div>
+      <div style={{ minWidth: '60px', display: 'inline-block', textAlign: 'right' }}>{data.yieldRatio}</div>
     </div>
   );
 }
