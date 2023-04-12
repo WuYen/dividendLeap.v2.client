@@ -25,36 +25,7 @@ function App() {
     fetchData();
     return () => {};
   }, []);
-  // return (
-  //   <List
-  //     data={[
-  //       {
-  //         column1: 'column1-1',
-  //         column2: 'column1-2',
-  //         column3: 'column1-3',
-  //         column4: 'column1-4',
-  //         column5: 'column1-5',
-  //         column6: 'column1-6',
-  //       },
-  //       {
-  //         column1: 'column2-1',
-  //         column2: 'column2-2',
-  //         column3: 'column2-3',
-  //         column4: 'column2-4',
-  //         column5: 'column2-5',
-  //         column6: 'column2-6',
-  //       },
-  //       {
-  //         column1: 'column3-1',
-  //         column2: 'column3-2',
-  //         column3: 'column3-3',
-  //         column4: 'column3-4',
-  //         column5: 'column3-5',
-  //         column6: 'column3-',
-  //       },
-  //     ]}
-  //   ></List>
-  // );
+
   return (
     <div className='App'>
       {!isMobile && (
@@ -120,6 +91,32 @@ function App() {
           flex-grow: 1;
           margin: 0px 28px 0px 10px;
         }
+
+        .truncate-text {
+          min-width: 120px;
+          display: inline-block;
+          text-align: left;
+          max-width: 120px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .hover-effect {
+          background-color: #f2f2f2;
+          padding: 10px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .hover-effect:hover {
+          background-color: #d9d9d9;
+        }
+
+        .row {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
       `}</style>
     </div>
   );
@@ -128,12 +125,16 @@ function App() {
 function Item(props) {
   const { data, showDate, isMobile } = props;
   return (
-    <div key={data.stockNo} style={{ margin: '5px 0px' }}>
+    <div key={data.stockNo} style={{ margin: '5px 0px' }} className='row'>
       {!isMobile && (
         <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>{showDate ? data.date : ''}</div>
       )}
       <div
+        className='hover-effect truncate-text'
         style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}
+        onClick={() => {
+          window.open(`https://www.google.com/search?q=股票${data.stockNo}`, '_blank');
+        }}
       >{`${data.stockNo} ${data.stockName}`}</div>
       <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.price}</div>
       <div style={{ minWidth: '80px', display: 'inline-block', textAlign: 'right' }}>{data.cashDividen}</div>
@@ -143,3 +144,34 @@ function Item(props) {
 }
 
 export default App;
+
+// return (
+//   <List
+//     data={[
+//       {
+//         column1: 'column1-1',
+//         column2: 'column1-2',
+//         column3: 'column1-3',
+//         column4: 'column1-4',
+//         column5: 'column1-5',
+//         column6: 'column1-6',
+//       },
+//       {
+//         column1: 'column2-1',
+//         column2: 'column2-2',
+//         column3: 'column2-3',
+//         column4: 'column2-4',
+//         column5: 'column2-5',
+//         column6: 'column2-6',
+//       },
+//       {
+//         column1: 'column3-1',
+//         column2: 'column3-2',
+//         column3: 'column3-3',
+//         column4: 'column3-4',
+//         column5: 'column3-5',
+//         column6: 'column3-',
+//       },
+//     ]}
+//   ></List>
+// );
