@@ -15,8 +15,14 @@ export function get(url) {
     headers: headers(),
   })
     .then((res) => res.json())
+    .then((data) => {
+      return {
+        success: true,
+        data: data,
+      };
+    })
     .catch((error) => {
-      console.log('error', error);
+      console.error('Get ' + url + ' fail', error);
       return {
         success: false,
         data: null,
@@ -33,8 +39,20 @@ export function post(url, payload) {
     body: payload,
   })
     .then((res) => res.json())
+    .then((data) => {
+      return {
+        success: true,
+        data: data,
+      };
+    })
     .catch((error) => {
-      console.log('error', error);
+      console.error('Post ' + url + ' fail', payload, error);
+      return {
+        success: false,
+        data: null,
+        error: error.name,
+        message: error.message,
+      };
     });
 }
 
