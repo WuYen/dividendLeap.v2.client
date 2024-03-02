@@ -7,7 +7,7 @@ import './PttStockBoard.css';
 function PttStockBoard() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  //const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -30,22 +30,26 @@ function PttStockBoard() {
   return (
     <div className='App'>
       <div className='title'>Ptt stock Board</div>
-      {data.map((post) => {
-        return (
-          <div key={post.id} style={{ marginBottom: '10px' }}>
-            <span
-              onClick={() => openNewPage(post.href)}
-              style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
-            >
-              [{post.tag}] {post.title}
-            </span>
-            <div>
-              <span style={{ marginRight: '20px' }}>作者: {post.author}</span>
-              <span>日期: {post.date}</span>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        data.map((post) => {
+          return (
+            <div key={post.id} style={{ marginBottom: '10px' }}>
+              <span
+                onClick={() => openNewPage(post.href)}
+                style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
+              >
+                [{post.tag}] {post.title}
+              </span>
+              <div>
+                <span style={{ marginRight: '20px' }}>作者: {post.author}</span>
+                <span>日期: {post.date}</span>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }
