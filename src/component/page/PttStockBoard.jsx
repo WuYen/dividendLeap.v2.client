@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
 import Loading from '../Loading/Loading';
-import '../../App.css';
-import './PttStockBoard.css';
 
 function PttStockBoard() {
   const [data, setData] = useState([]);
@@ -28,8 +26,8 @@ function PttStockBoard() {
   };
 
   return (
-    <div className='App'>
-      <div className='title'>Ptt stock Board</div>
+    <div className="App">
+      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>PTT Stock Board</h1>
       {isLoading ? (
         <Loading />
       ) : (
@@ -46,6 +44,7 @@ function PttStockBoard() {
                 <span style={{ marginRight: '20px' }}>作者: {post.author}</span>
                 <span>日期: {post.date}</span>
               </div>
+              <hr style={{ width: '25%' }}></hr>
             </div>
           );
         })

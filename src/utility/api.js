@@ -59,6 +59,7 @@ export function post(url, payload) {
 const index = {
   get,
   post,
+  domain: dataAPI,
 };
 
 export default index;
