@@ -38,7 +38,7 @@ function CallbackPage(props) {
     if (tokenInfoObject == null) {
       navigate('/error');
     }
-  }, [tokenInfoObject]);
+  }, [tokenInfoObject, navigate]);
 
   return (
     tokenInfoObject && (
@@ -56,7 +56,6 @@ function CallbackPage(props) {
 }
 
 function AccountForm(props) {
-  const { tokenInfoString } = props;
   const [account, setAccount] = useState({ username: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
