@@ -58,12 +58,12 @@ function CallbackPage(props) {
 function AccountForm(props) {
   const [account, setAccount] = useState({ username: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [responseMessage, setResponseMessage] = useState('');
+  const [responseData, setResponseData] = useState(null);
   const inputRef = useRef(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setResponseMessage('');
+    setResponseData(null);
     setAccount((prevState) => ({ ...prevState, [name]: value }));
   };
 
@@ -75,15 +75,11 @@ function AccountForm(props) {
       setIsLoading(true);
       try {
         var resData = await handleAPICall(account.username);
-        window.open(resData.redirectUrl); // Open in a new tab
         console.log('handleSubmit success', resData);
-        setResponseMessage('SUCCESS');
+        setResponseData({ message: 'SUCCESS', data: resData });
       } catch (error) {
         console.error('handleSubmit fail', error);
-        setResponseMessage('FAILED');
-        setTimeout(() => {
-          inputRef.current.focus(); // Reset focus to the input field
-        }, 0);
+        setResponseData({ message: 'FAILED', data: null });
       }
       setIsLoading(false);
     }
@@ -103,16 +99,34 @@ function AccountForm(props) {
   };
 
   useEffect(() => {
-    let timeoutId;
-    if (responseMessage) {
-      timeoutId = setTimeout(() => {
-        setResponseMessage('');
+    let timeoutIds = [];
+    if (responseData && responseData.message) {
+      if (responseData.message === 'FAILED') {
+        const focusTimeoutId = setTimeout(() => {
+          inputRef.current.focus(); // Reset focus to the input field
+        }, 0);
+        timeoutIds.push(focusTimeoutId);
+      } else {
+        if (responseData.data && responseData.data.redirectUrl) {
+          const redirectTimeoutId = setTimeout(() => {
+            window.open(responseData.data.redirectUrl); // Open in a new tab
+          }, 1000);
+          timeoutIds.push(redirectTimeoutId);
+        }
+      }
+
+      const responseDataTimeoutId = setTimeout(() => {
+        setResponseData(null);
       }, 1800);
+      timeoutIds.push(responseDataTimeoutId);
     }
+
     return () => {
-      clearTimeout(timeoutId);
+      timeoutIds.forEach((timeoutId) => clearTimeout(timeoutId));
     };
-  }, [responseMessage]);
+  }, [responseData]);
+
+  const { message, data } = responseData ? responseData : {};
 
   return (
     <>
@@ -135,14 +149,19 @@ function AccountForm(props) {
         <div className="regis-item-gap-10" />
         {isLoading ? (
           <div className="regis-button">Loading...</div>
-        ) : responseMessage ? (
-          <div
-            className={`regis-button ${
-              responseMessage === 'FAILED' ? 'failed' : responseMessage === 'SUCCESS' ? 'success' : ''
-            }`}
-          >
-            {responseMessage}
-          </div>
+        ) : message ? (
+          <>
+            <div className={`regis-button ${message === 'FAILED' ? 'failed' : message === 'SUCCESS' ? 'success' : ''}`}>
+              {message}
+            </div>
+            {data && data.redirectUrl ? (
+              <div>
+                <a href={data.redirectUrl} rel="noopener noreferrer">
+                  兩秒後沒有自動跳轉請點這
+                </a>
+              </div>
+            ) : null}
+          </>
         ) : (
           <button className="regis-button" type="submit">
             👉 GO GO
