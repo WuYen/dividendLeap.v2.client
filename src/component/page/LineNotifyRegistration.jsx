@@ -60,6 +60,7 @@ function AccountForm(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const inputRef = useRef(null);
+  const redirectLinkRef = useRef(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -108,10 +109,12 @@ function AccountForm(props) {
         timeoutIds.push(focusTimeoutId);
       } else {
         if (responseData.data && responseData.data.redirectUrl) {
+          const lineLink = responseData.data.redirectUrl.replace('https', 'line');
           const redirectTimeoutId = setTimeout(() => {
-            window.open(responseData.data.redirectUrl); // Open in a new tab
+            window.open(lineLink); // Open in a new tab
           }, 1000);
           timeoutIds.push(redirectTimeoutId);
+          redirectLinkRef.current = { redirectUrl: lineLink };
         }
       }
 
@@ -126,7 +129,7 @@ function AccountForm(props) {
     };
   }, [responseData]);
 
-  const { message, data } = responseData ? responseData : {};
+  const { message } = responseData ? responseData : {};
 
   return (
     <>
@@ -150,23 +153,21 @@ function AccountForm(props) {
         {isLoading ? (
           <div className="regis-button">Loading...</div>
         ) : message ? (
-          <>
-            <div className={`regis-button ${message === 'FAILED' ? 'failed' : message === 'SUCCESS' ? 'success' : ''}`}>
-              {message}
-            </div>
-            {data && data.redirectUrl ? (
-              <div>
-                <a href={data.redirectUrl} rel="noopener noreferrer">
-                  兩秒後沒有自動跳轉請點這
-                </a>
-              </div>
-            ) : null}
-          </>
+          <div className={`regis-button ${message === 'FAILED' ? 'failed' : message === 'SUCCESS' ? 'success' : ''}`}>
+            {message}
+          </div>
         ) : (
           <button className="regis-button" type="submit">
             👉 GO GO
           </button>
         )}
+        {redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? (
+          <div>
+            <a href={redirectLinkRef.current.redirectUrl} rel="noopener noreferrer">
+              兩秒後沒有自動跳轉請點這
+            </a>
+          </div>
+        ) : null}
         <div className="regis-item-gap-10" />
       </form>
       <div>說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
