@@ -7,7 +7,7 @@ export default function LineNotifyRegistration(props) {
   const { isCallbackPage } = props;
 
   return (
-    <div className="App">
+    <div className='App'>
       <div>
         <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>註冊 Line 通知</h1>
         {isCallbackPage ? <CallbackPage /> : <AccountForm />}
@@ -44,11 +44,11 @@ function CallbackPage(props) {
     tokenInfoObject && (
       <div>
         <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
-        <div className="regis-item-gap-1" />
+        <div className='regis-item-gap-1' />
         <label>🎊&nbsp; &nbsp; 註冊成功 &nbsp;&nbsp; 🎊</label>
-        <div className="regis-item-gap-1" />
+        <div className='regis-item-gap-1' />
         <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
-        <div className="regis-item-gap-10" />
+        <div className='regis-item-gap-10' />
         <label>尊貴的使用者: {tokenInfoObject.channel}</label>
       </div>
     )
@@ -60,7 +60,8 @@ function AccountForm(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const inputRef = useRef(null);
-  const redirectLinkRef = useRef(null);
+  const linkRef = useRef(null);
+  const redirectLinkRef = useRef('');
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -77,10 +78,10 @@ function AccountForm(props) {
       try {
         var resData = await handleAPICall(account.username);
         console.log('handleSubmit success', resData);
-        setResponseData({ message: 'SUCCESS', data: resData });
+        setResponseData({ status: 'SUCCESS', data: resData });
       } catch (error) {
         console.error('handleSubmit fail', error);
-        setResponseData({ message: 'FAILED', data: null });
+        setResponseData({ status: 'FAILED', data: null });
       }
       setIsLoading(false);
     }
@@ -101,8 +102,8 @@ function AccountForm(props) {
 
   useEffect(() => {
     let timeoutIds = [];
-    if (responseData && responseData.message) {
-      if (responseData.message === 'FAILED') {
+    if (responseData && responseData.status) {
+      if (responseData.status === 'FAILED') {
         const focusTimeoutId = setTimeout(() => {
           inputRef.current.focus(); // Reset focus to the input field
         }, 0);
@@ -111,7 +112,9 @@ function AccountForm(props) {
         if (responseData.data && responseData.data.redirectUrl) {
           const lineLink = responseData.data.redirectUrl; //.replace('https', 'line');
           const redirectTimeoutId = setTimeout(() => {
-            window.open(lineLink); // Open in a new tab
+            //window.open(lineLink); // not work in iphone
+            linkRef.current.setAttribute('href', lineLink);
+            linkRef.current.click();
           }, 1000);
           timeoutIds.push(redirectTimeoutId);
           redirectLinkRef.current = { redirectUrl: lineLink };
@@ -129,48 +132,72 @@ function AccountForm(props) {
     };
   }, [responseData]);
 
-  const { message } = responseData ? responseData : {};
-
+  const { status } = responseData ? responseData : {};
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">你是誰👇</label>
-          <div className="regis-item-gap-10" />
+        <div className='form-group'>
+          <label htmlFor='username'>你是誰👇</label>
+          <div className='regis-item-gap-10' />
           <input
             ref={inputRef} // Set the input reference
-            className="regis-input"
-            type="text"
-            name="username"
-            id="username"
+            className='regis-input'
+            type='text'
+            name='username'
+            id='username'
             value={account.username}
             onChange={handleChange}
             disabled={isLoading} // Disable input while loading
             required
           />
         </div>
-        <div className="regis-item-gap-10" />
+        <div className='regis-item-gap-10' />
         {isLoading ? (
-          <div className="regis-button">Loading...</div>
-        ) : message ? (
-          <div className={`regis-button ${message === 'FAILED' ? 'failed' : message === 'SUCCESS' ? 'success' : ''}`}>
-            {message}
+          <div className='regis-button'>Loading...</div>
+        ) : status ? (
+          <div className={`regis-button ${status.toLowerCase()}`}>
+            {status === 'FAILED' ? 'No~~ 失敗了' : 'Yes!! 成功了'}
           </div>
         ) : (
-          <button className="regis-button" type="submit">
+          <button className='regis-button' type='submit'>
             👉 GO GO
           </button>
         )}
-        {redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? (
-          <div>
-            <a href={redirectLinkRef.current.redirectUrl} rel="noopener noreferrer">
-              兩秒後沒有自動跳轉請點這
-            </a>
-          </div>
-        ) : null}
-        <div className="regis-item-gap-10" />
+
+        <div style={{ display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
+          <div className='regis-item-gap-10' />
+          {console.log('render ~~', redirectLinkRef.current.redirectUrl)}
+          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
+            兩秒後沒有自動跳轉請點這
+          </a>
+        </div>
+
+        <div className='regis-item-gap-10' />
       </form>
       <div>說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
     </>
   );
 }
+
+// 方法1. 先打开一个空白页, 再更新它的地址
+
+// let oWindow = window.open("", "_blank");
+// axios.get('xxx').then((url) => {
+// oWindow.location = url;
+// });
+
+// 方法2. 超链接打开
+
+// axios.get('xxx').then((url) => {
+// let a = document.createElement('a');
+// a.setAttribute('href', url);
+// document.body.appendChild(dom);
+// a.click();
+// a.remove()
+// });
+
+// 方法3. 使用 window.location
+
+// axios.get('xxx').then((url) => {
+// window.location.href = url;
+// });

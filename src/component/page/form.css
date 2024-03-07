@@ -65,11 +65,11 @@
 }
 
 .regis-button.success {
-  color: #12c812;
+  color: #4a991a;
   border: none;
   cursor: default;
   :hover {
     color: #fff;
-    background-color: #12c812;
+    background-color: #4a991a;
   }
 }
