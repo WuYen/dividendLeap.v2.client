@@ -109,7 +109,7 @@ function AccountForm(props) {
         timeoutIds.push(focusTimeoutId);
       } else {
         if (responseData.data && responseData.data.redirectUrl) {
-          const lineLink = responseData.data.redirectUrl.replace('https', 'line');
+          const lineLink = responseData.data.redirectUrl; //.replace('https', 'line');
           const redirectTimeoutId = setTimeout(() => {
             window.open(lineLink); // Open in a new tab
           }, 1000);
