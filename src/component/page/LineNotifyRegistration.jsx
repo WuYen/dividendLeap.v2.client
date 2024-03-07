@@ -77,8 +77,9 @@ function AccountForm(props) {
       setIsLoading(true);
       try {
         var resData = await handleAPICall(account.username);
+        var status = resData.error ? 'FAILED' : 'SUCCESS';
+        setResponseData({ status, data: resData });
         console.log('handleSubmit success', resData);
-        setResponseData({ status: 'SUCCESS', data: resData });
       } catch (error) {
         console.error('handleSubmit fail', error);
         setResponseData({ status: 'FAILED', data: null });
@@ -157,6 +158,8 @@ function AccountForm(props) {
         ) : status ? (
           <div className={`regis-button ${status.toLowerCase()}`}>
             {status === 'FAILED' ? 'No~~ 失敗了' : 'Yes!! 成功了'}
+            <br />
+            <label>{responseData?.data?.error || ''}</label>
           </div>
         ) : (
           <button className='regis-button' type='submit'>
@@ -166,7 +169,6 @@ function AccountForm(props) {
 
         <div style={{ display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
           <div className='regis-item-gap-10' />
-          {console.log('render ~~', redirectLinkRef.current.redirectUrl)}
           <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
             兩秒後沒有自動跳轉請點這
           </a>
