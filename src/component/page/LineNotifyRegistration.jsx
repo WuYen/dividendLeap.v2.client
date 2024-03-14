@@ -55,7 +55,7 @@ function CallbackPage(props) {
   );
 }
 
-function AccountForm(props) {
+export function AccountForm(props) {
   const [account, setAccount] = useState({ username: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
