@@ -7,7 +7,7 @@ export default function LineNotifyRegistration(props) {
   const { isCallbackPage } = props;
 
   return (
-    <div className='App'>
+    <div className="App">
       <div>
         <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>註冊 Line 通知</h1>
         {isCallbackPage ? <CallbackPage /> : <AccountForm />}
@@ -27,11 +27,11 @@ function CallbackPage(props) {
     tokenInfoObject = JSON.parse(decodedTokenInfoString);
     if (!tokenInfoObject.channel) {
       tokenInfoObject = null;
-      throw new Error('invalid token: ' + decodedTokenInfoString);
+      throw new Error('invalid token ' + decodedTokenInfoString);
     }
   } catch (error) {
     tokenInfoObject = null;
-    console.error('parse token info from query fail', error);
+    console.warn('parse query token info fail', error);
   }
 
   useEffect(() => {
@@ -44,11 +44,11 @@ function CallbackPage(props) {
     tokenInfoObject && (
       <div>
         <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
-        <div className='regis-item-gap-1' />
+        <div className="regis-item-gap-1" />
         <label>🎊&nbsp; &nbsp; 註冊成功 &nbsp;&nbsp; 🎊</label>
-        <div className='regis-item-gap-1' />
+        <div className="regis-item-gap-1" />
         <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
-        <div className='regis-item-gap-10' />
+        <div className="regis-item-gap-10" />
         <label>尊貴的使用者: {tokenInfoObject.channel}</label>
       </div>
     )
@@ -137,24 +137,24 @@ export function AccountForm(props) {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className='form-group'>
-          <label htmlFor='username'>你是誰👇</label>
-          <div className='regis-item-gap-10' />
+        <div className="form-group">
+          <label htmlFor="username">你是誰👇</label>
+          <div className="regis-item-gap-10" />
           <input
             ref={inputRef} // Set the input reference
-            className='regis-input'
-            type='text'
-            name='username'
-            id='username'
+            className="regis-input"
+            type="text"
+            name="username"
+            id="username"
             value={account.username}
             onChange={handleChange}
             disabled={isLoading} // Disable input while loading
             required
           />
         </div>
-        <div className='regis-item-gap-10' />
+        <div className="regis-item-gap-10" />
         {isLoading ? (
-          <div className='regis-button'>Loading...</div>
+          <div className="regis-button">Loading...</div>
         ) : status ? (
           <div className={`regis-button ${status.toLowerCase()}`}>
             {status === 'FAILED' ? 'No~~ 失敗了' : 'Yes!! 成功了'}
@@ -162,19 +162,19 @@ export function AccountForm(props) {
             <label>{responseData?.data?.error || ''}</label>
           </div>
         ) : (
-          <button className='regis-button' type='submit'>
+          <button className="regis-button" type="submit">
             👉 GO GO
           </button>
         )}
 
         <div style={{ display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
-          <div className='regis-item-gap-10' />
-          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
+          <div className="regis-item-gap-10" />
+          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel="noopener noreferrer">
             兩秒後沒有自動跳轉請點這
           </a>
         </div>
 
-        <div className='regis-item-gap-10' />
+        <div className="regis-item-gap-10" />
       </form>
       <div>說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
     </>
