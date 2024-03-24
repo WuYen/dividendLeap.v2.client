@@ -19,7 +19,7 @@ export default function PttAuthorHistoryInfo() {
     }
     fetchData();
     return () => {};
-  }, []);
+  }, [id]);
 
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
