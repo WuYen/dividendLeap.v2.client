@@ -2,6 +2,7 @@ import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import DividendSchedule from './component/page/DividendSchedule';
 import PttStockBoard from './component/page/PttStockBoard';
+import PttAuthorHistoryInfo from './component/page/PttAuthorHistoryInfo';
 import Home from './component/page/Home';
 import ServerError from './component/page/ServerError';
 import LineNotifyRegistration from './component/page/LineNotifyRegistration';
@@ -16,6 +17,11 @@ function App() {
     {
       path: '/ptt',
       element: <PttStockBoard />,
+      errorElement: <ServerError />,
+    },
+    {
+      path: '/ptt/author/:id',
+      element: <PttAuthorHistoryInfo />,
       errorElement: <ServerError />,
     },
     {
