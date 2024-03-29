@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
-import Loading from '../Loading/Loading';
-import { useParams } from 'react-router-dom';
+import TeaLoading from '../loading/TeaLoading';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function PttAuthorHistoryInfo() {
   const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
@@ -15,11 +16,13 @@ export default function PttAuthorHistoryInfo() {
       if (response.success) {
         setData(response.data);
         setIsLoading(false);
+      } else {
+        navigate('/error');
       }
     }
     fetchData();
     return () => {};
-  }, [id]);
+  }, [id, navigate]);
 
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
@@ -27,10 +30,10 @@ export default function PttAuthorHistoryInfo() {
   };
 
   return (
-    <div className='App'>
+    <div className="App">
       <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>作者: {id} [標的]</h1>
       {isLoading ? (
-        <Loading />
+        <TeaLoading />
       ) : (
         data.map((item) => {
           const { post, processedData, historicalInfo } = item;
