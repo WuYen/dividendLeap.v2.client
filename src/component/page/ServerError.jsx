@@ -3,7 +3,7 @@
 function ServerError() {
   return (
     <div className="App">
-      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>500 Server Error</h1>
+      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>🐒 Oops!</h1>
       <hr style={{ margin: 'auto', width: '40%' }} />
       <p>Looks like something went wrong.</p>
     </div>
