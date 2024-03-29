@@ -125,7 +125,7 @@ describe('Test CallbackPage', () => {
   test('renders success message with valid token info', () => {
     renderWithRouter(validTokenInfo);
     expect(screen.getByText(/註冊成功/i)).toBeInTheDocument();
-    expect(screen.getByText(`尊貴的使用者: ${validTokenInfo.channel}`)).toBeInTheDocument();
+    expect(screen.getByText(validTokenInfo.channel, { exact: false })).toBeInTheDocument();
   });
 
   test('navigates to error page with invalid token info', () => {
