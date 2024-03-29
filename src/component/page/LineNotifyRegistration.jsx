@@ -43,13 +43,9 @@ function CallbackPage(props) {
   return (
     tokenInfoObject && (
       <div>
-        <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
-        <div className="regis-item-gap-1" />
-        <label>🎊&nbsp; &nbsp; 註冊成功 &nbsp;&nbsp; 🎊</label>
-        <div className="regis-item-gap-1" />
-        <label>🎊🎊🎊🎊🎊🎊🎊🎊</label>
+        <label>註冊成功</label>
         <div className="regis-item-gap-10" />
-        <label>尊貴的使用者: {tokenInfoObject.channel}</label>
+        <label>尊貴的 {tokenInfoObject.channel} 大人</label>
       </div>
     )
   );
