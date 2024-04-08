@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
-import Loading from '../Loading/Loading';
+import Loading from '../loading/Loading';
 // import '../../App.css';
 
 function DividendSchedule() {
