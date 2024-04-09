@@ -30,9 +30,9 @@ export default function PttAuthorHistoryInfo() {
   };
 
   return (
-    <div className="App">
+    <div className='App'>
       <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>作者: {id} [標的]</h1>
-      <hr style={{ margin: 'auto', width: '40%' }} />
+      <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px' }} />
       <div
         style={{
           marginBlockStart: '1em',
@@ -41,6 +41,7 @@ export default function PttAuthorHistoryInfo() {
           marginInlineEnd: '0px',
         }}
       >
+        <div style={{ marginBottom: '20px' }}>📢 顯示近四個月內最高點</div>
         {isLoading ? (
           <TeaLoading />
         ) : data.length === 0 ? (
