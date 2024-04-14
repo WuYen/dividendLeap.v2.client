@@ -41,14 +41,14 @@ export default function PttAuthorHistoryInfo() {
           marginInlineEnd: '0px',
         }}
       >
-        <div style={{ marginBottom: '20px' }}>📢 顯示近四個月內最高點</div>
+        <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
         {isLoading ? (
           <TeaLoading />
         ) : data.length === 0 ? (
           <Empty />
         ) : (
           data.map((item) => {
-            const { post, processedData, historicalInfo } = item;
+            const { post, processedData, historicalInfo, isRecentPost } = item;
             const highestPrice = processedData && processedData.length ? processedData[0] : {};
             const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
 
@@ -61,13 +61,35 @@ export default function PttAuthorHistoryInfo() {
                   padding: '20px',
                   border: '1px solid #ccc',
                   borderRadius: '5px',
+                  position: 'relative',
                 }}
               >
+                {isRecentPost && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-1px',
+                      right: '-1px',
+                      backgroundColor: '#5bbcdb',
+                      color: 'white',
+                      padding: '5px 10px',
+                      borderRadius: '5px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    新
+                  </div>
+                )}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                   {/* row 1 */}
                   <div
                     onClick={() => openNewPage(post.href)}
-                    style={{ gridColumn: '1 / span 3', textAlign: 'left', cursor: 'pointer' }}
+                    style={{
+                      gridColumn: '1 / span 3',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      marginRight: isRecentPost ? '30px' : '0px',
+                    }}
                   >
                     [{post.tag}] {post.title}👈
                   </div>
