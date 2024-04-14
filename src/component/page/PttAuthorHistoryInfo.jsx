@@ -30,23 +30,24 @@ export default function PttAuthorHistoryInfo() {
   };
 
   return (
-    <div className="App">
+    <div className='App'>
       <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>作者: {id} [標的]</h1>
-      <hr style={{ margin: 'auto', width: '40%' }} />
-      {isLoading ? (
-        <TeaLoading />
-      ) : data.length === 0 ? (
-        <Empty />
-      ) : (
-        <div
-          style={{
-            marginBlockStart: '1em',
-            marginBlockEnd: '1em',
-            marginInlineStart: '0px',
-            marginInlineEnd: '0px',
-          }}
-        >
-          {data.map((item) => {
+      <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px' }} />
+      <div
+        style={{
+          marginBlockStart: '1em',
+          marginBlockEnd: '1em',
+          marginInlineStart: '0px',
+          marginInlineEnd: '0px',
+        }}
+      >
+        <div style={{ marginBottom: '20px' }}>📢 顯示近四個月內最高點</div>
+        {isLoading ? (
+          <TeaLoading />
+        ) : data.length === 0 ? (
+          <Empty />
+        ) : (
+          data.map((item) => {
             const { post, processedData, historicalInfo } = item;
             const highestPrice = processedData && processedData.length ? processedData[0] : {};
             const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
@@ -93,9 +94,9 @@ export default function PttAuthorHistoryInfo() {
                 </div>
               </div>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </div>
   );
 }
@@ -121,7 +122,7 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
 function Empty(props) {
   return (
     <>
-      <p>無資料</p>
+      <label>無資料</label>
     </>
   );
 }
