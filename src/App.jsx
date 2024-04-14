@@ -6,6 +6,7 @@ import PttAuthorHistoryInfo from './component/page/PttAuthorHistoryInfo';
 import Home from './component/page/Home';
 import ServerError from './component/page/ServerError';
 import LineNotifyRegistration from './component/page/LineNotifyRegistration';
+import PttAuthorList from './component/page/PttAuthorList';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,6 +18,11 @@ function App() {
     {
       path: '/ptt',
       element: <PttStockBoard />,
+      errorElement: <ServerError />,
+    },
+    {
+      path: '/ptt/author/list',
+      element: <PttAuthorList />,
       errorElement: <ServerError />,
     },
     {
