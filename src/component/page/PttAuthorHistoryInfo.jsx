@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export default function PttAuthorHistoryInfo() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
 
   useEffect(() => {
     async function fetchData() {
-      const response = await api.get(`/ptt/author/${id}`);
+      const refresh = new URLSearchParams(location.search).get('refresh');
+      const response = await api.get(`/ptt/author/${id}?refresh=${refresh === 'true'}`);
       console.log('fetch data', response);
       if (response.success) {
         setData(response.data);
@@ -22,7 +24,7 @@ export default function PttAuthorHistoryInfo() {
     }
     fetchData();
     return () => {};
-  }, [id, navigate]);
+  }, [id, navigate, location]);
 
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
@@ -30,7 +32,7 @@ export default function PttAuthorHistoryInfo() {
   };
 
   return (
-    <div className='App'>
+    <div className="App">
       <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>作者: {id} [標的]</h1>
       <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px' }} />
       <div
@@ -49,8 +51,8 @@ export default function PttAuthorHistoryInfo() {
         ) : (
           data.map((item) => {
             const { post, processedData, historicalInfo, isRecentPost } = item;
-            const highestPrice = processedData && processedData.length ? processedData[0] : {};
             const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
+            const processInfo = processedData && processedData.length ? processedData[0] : {};
 
             return (
               <div
@@ -99,18 +101,18 @@ export default function PttAuthorHistoryInfo() {
                   <div style={{ textAlign: 'left' }}>
                     <label style={{ fontWeight: 'bold' }}>交易日</label>
                     <div>{base.date ? toYYYYMMDDWithSeparator(base.date) : '-'}</div>
-                    <div>{highestPrice.date ? toYYYYMMDDWithSeparator(highestPrice.date) : '-'}</div>
+                    <div>{processInfo.date ? toYYYYMMDDWithSeparator(processInfo.date) : '-'}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <label style={{ fontWeight: 'bold' }}>股價</label>
                     <div>{base.close ? base.close.toFixed(2) : '-'}</div>
-                    <div>{highestPrice.price ? highestPrice.price.toFixed(2) : '-'}</div>
+                    <div>{processInfo.price ? processInfo.price.toFixed(2) : '-'}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <label style={{ fontWeight: 'bold' }}>差異</label>
                     <div>-</div>
                     <div>
-                      {highestPrice.diff} ({highestPrice.diffPercent}%)
+                      {processInfo.diff} ({processInfo.diffPercent}%)
                     </div>
                   </div>
                 </div>
