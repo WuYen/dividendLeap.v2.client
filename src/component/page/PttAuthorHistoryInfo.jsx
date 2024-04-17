@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import PageTitle from '../common/PageTitle';
 
 export default function PttAuthorHistoryInfo() {
   const [data, setData] = useState([]);
@@ -32,17 +33,9 @@ export default function PttAuthorHistoryInfo() {
   };
 
   return (
-    <div className="App">
-      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>作者: {id} [標的]</h1>
-      <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px' }} />
-      <div
-        style={{
-          marginBlockStart: '1em',
-          marginBlockEnd: '1em',
-          marginInlineStart: '0px',
-          marginInlineEnd: '0px',
-        }}
-      >
+    <div className='App'>
+      <PageTitle titleText={`作者: ${id} [標的]`} />
+      <div>
         <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
         {isLoading ? (
           <TeaLoading />

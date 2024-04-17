@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
 import Loading from '../loading/Loading';
+import PageTitle from '../common/PageTitle';
 
 function PttStockBoard() {
   const [data, setData] = useState([]);
@@ -26,8 +27,8 @@ function PttStockBoard() {
   };
 
   return (
-    <div className="App">
-      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>PTT Stock Board</h1>
+    <div className='App'>
+      <PageTitle titleText={'PTT Stock Board'} />
       {isLoading ? (
         <Loading />
       ) : (
