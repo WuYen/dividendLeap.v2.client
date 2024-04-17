@@ -28,33 +28,31 @@ export default function PttAuthorList() {
   return (
     <div className='App'>
       <PageTitle titleText={'作者列表'} />
-      <div>
-        {/* <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div> */}
-        {isLoading ? (
-          <TeaLoading />
-        ) : data.length === 0 ? (
-          <Empty />
-        ) : (
-          data.map((item) => {
-            return (
-              <div
-                style={{
-                  background: '#f9f9f9',
-                  border: '1px solid #ddd',
-                  padding: '10px',
-                  borderRadius: '5px',
-                  maxWidth: '450px',
-                  margin: '0 auto 10px',
-                }}
-              >
-                <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-                <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-                <Link to={`/ptt/author/${item.name}`}>Link</Link>
-              </div>
-            );
-          })
-        )}
-      </div>
+      {isLoading ? (
+        <TeaLoading />
+      ) : data.length === 0 ? (
+        <Empty />
+      ) : (
+        data.map((item) => {
+          return (
+            <div
+              key={item.name}
+              style={{
+                maxWidth: '450px',
+                margin: '0 auto 30px',
+                padding: '20px',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                position: 'relative',
+              }}
+            >
+              <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
+              <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
+              <Link to={`/ptt/author/${item.name}`}>Link</Link>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }

@@ -34,18 +34,31 @@ function PttStockBoard() {
       ) : (
         data.map((post) => {
           return (
-            <div key={post.id} style={{ marginBottom: '10px' }}>
-              <span
-                onClick={() => openNewPage(post.href)}
-                style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
-              >
-                [{post.tag}] {post.title}
-              </span>
-              <div>
-                <span style={{ marginRight: '20px' }}>作者: {post.author}</span>
-                <span>日期: {post.date}</span>
+            <div
+              key={post.id}
+              style={{
+                maxWidth: '450px',
+                margin: '0 auto 30px',
+                padding: '20px',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                position: 'relative',
+              }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div
+                  onClick={() => openNewPage(post.href)}
+                  style={{
+                    gridColumn: '1 / span 2',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  [{post.tag}] {post.title}
+                </div>
+                <div style={{ textAlign: 'left' }}>作者: {post.author}</div>
+                <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
               </div>
-              <hr style={{ width: '25%' }}></hr>
             </div>
           );
         })
