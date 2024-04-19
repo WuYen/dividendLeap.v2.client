@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
 import PageTitle from '../common/PageTitle';
@@ -9,8 +9,7 @@ export default function PttAuthorHistoryInfo() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     async function fetchData() {
@@ -26,7 +25,7 @@ export default function PttAuthorHistoryInfo() {
     }
     fetchData();
     return () => {};
-  }, [id, navigate, searchParams]);
+  }, [id, searchParams, navigate]);
 
   const token = searchParams.get('token');
   const handleLikeClick = () => {
