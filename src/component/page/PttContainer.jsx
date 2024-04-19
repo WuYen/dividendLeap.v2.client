@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
@@ -12,37 +12,42 @@ export default function PttContainer() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
 
-  let url = '';
-  let List = null;
-  let pageTitleComponent = null;
-  switch (location.pathname) {
-    case '/ptt':
-      url = '/ptt/list';
-      List = StockList;
-      pageTitleComponent = <PageTitle titleText={'PTT Stock Board'} />;
-      break;
-    case '/ptt/author/list':
-      url = '/ptt/author/list';
-      List = AuthorList;
-      pageTitleComponent = <PageTitle titleText={'作者列表'} />;
-      break;
-    default:
-      const refresh = searchParams.get('refresh');
-      //const token = searchParams.get('token');
-      // const handleLikeClick = () => {
-      //   api.get(`/ptt/author/${id}/like?token=${token}`);
-      // };
-      url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
-      List = HistoryList;
-      pageTitleComponent = (
-        <>
-          <PageTitle titleText={`作者: ${id} [標的]`} />
-          <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-          {/* {token && <div onClick={handleLikeClick}>Like</div>} */}
-        </>
-      );
-      break;
-  }
+  const { url, List, pageTitleComponent } = useMemo(() => {
+    let url = '';
+    let List = null;
+    let pageTitleComponent = null;
+
+    switch (location.pathname) {
+      case '/ptt':
+        url = '/ptt/list';
+        List = StockList;
+        pageTitleComponent = <PageTitle titleText={'PTT Stock Board'} />;
+        break;
+      case '/ptt/author/list':
+        url = '/ptt/author/list';
+        List = AuthorList;
+        pageTitleComponent = <PageTitle titleText={'作者列表'} />;
+        break;
+      default:
+        const refresh = searchParams.get('refresh');
+        //const token = searchParams.get('token');
+        // const handleLikeClick = () => {
+        //   api.get(`/ptt/author/${id}/like?token=${token}`);
+        // };
+        url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+        List = HistoryList;
+        pageTitleComponent = (
+          <>
+            <PageTitle titleText={`作者: ${id} [標的]`} />
+            <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
+            {/* {token && <div onClick={handleLikeClick}>Like</div>} */}
+          </>
+        );
+        break;
+    }
+
+    return { url, List, pageTitleComponent };
+  }, [location.pathname, id, searchParams]);
 
   useEffect(() => {
     async function fetchData() {
