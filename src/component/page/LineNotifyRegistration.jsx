@@ -2,14 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../utility/api';
 import './form.css';
+import PageTitle from '../common/PageTitle';
 
 export default function LineNotifyRegistration(props) {
   const { isCallbackPage } = props;
 
   return (
-    <div className="App">
+    <div className='App'>
       <div>
-        <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>註冊 Line 通知</h1>
+        <PageTitle titleText={'註冊 Line 通知'} />
         {isCallbackPage ? <CallbackPage /> : <AccountForm />}
       </div>
     </div>
@@ -44,7 +45,7 @@ function CallbackPage(props) {
     tokenInfoObject && (
       <div>
         <label>註冊成功</label>
-        <div className="regis-item-gap-10" />
+        <div className='regis-item-gap-10' />
         <label>尊貴的 {tokenInfoObject.channel} 大人</label>
       </div>
     )
@@ -132,25 +133,26 @@ export function AccountForm(props) {
   const { status } = responseData ? responseData : {};
   return (
     <>
+      <div style={{ marginBottom: '20px' }}>📢 說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">你是誰👇</label>
-          <div className="regis-item-gap-10" />
+        <div className='form-group'>
+          <label htmlFor='username'>你是誰👇</label>
+          <div className='regis-item-gap-10' />
           <input
             ref={inputRef} // Set the input reference
-            className="regis-input"
-            type="text"
-            name="username"
-            id="username"
+            className='regis-input'
+            type='text'
+            name='username'
+            id='username'
             value={account.username}
             onChange={handleChange}
             disabled={isLoading} // Disable input while loading
             required
           />
         </div>
-        <div className="regis-item-gap-10" />
+        <div className='regis-item-gap-10' />
         {isLoading ? (
-          <div className="regis-button">Loading...</div>
+          <div className='regis-button'>Loading...</div>
         ) : status ? (
           <div className={`regis-button ${status.toLowerCase()}`}>
             {status === 'FAILED' ? 'No~~ 失敗了' : 'Yes!! 成功了'}
@@ -158,21 +160,20 @@ export function AccountForm(props) {
             <label>{responseData?.data?.error || ''}</label>
           </div>
         ) : (
-          <button className="regis-button" type="submit">
-            👉 GO GO
+          <button className='regis-button' type='submit'>
+            註冊
           </button>
         )}
 
         <div style={{ display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
-          <div className="regis-item-gap-10" />
-          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel="noopener noreferrer">
+          <div className='regis-item-gap-10' />
+          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
             兩秒後沒有自動跳轉請點這
           </a>
         </div>
 
-        <div className="regis-item-gap-10" />
+        <div className='regis-item-gap-10' />
       </form>
-      <div>說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
     </>
   );
 }
