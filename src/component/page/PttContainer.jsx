@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
 import PageTitle from '../common/PageTitle';
+import './tab.css'; // 將 CSS 檔案引入
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -38,7 +39,7 @@ export default function PttContainer() {
         List = HistoryList;
         pageTitleComponent = (
           <>
-            <PageTitle titleText={`作者: ${id} [標的]`} />
+            <PageTitle titleText={`作者: ${id} 貼文`} />
             <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
             {/* {token && <div onClick={handleLikeClick}>Like</div>} */}
           </>
@@ -71,11 +72,68 @@ export default function PttContainer() {
   }, [url, navigate]);
 
   return (
-    <div className="App">
+    <div className='App'>
       {pageTitleComponent}
       {isLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
     </div>
   );
+}
+
+function PostTabs(props) {
+  const { data, activeTag, onSetActiveTag } = props;
+  const distinctTags = new Set(data.map((item) => item.post.tag));
+  console.log(Array.from(distinctTags)); // ['標的']
+  return (
+    <div className='container'>
+      <div className='tabs'>
+        <input
+          type='radio'
+          id='radio-all'
+          name='tabs'
+          checked={activeTag === '全部'}
+          onChange={() => onSetActiveTag('全部')}
+        />
+        <label className={`tab ${activeTag === '全部' ? 'active' : ''}`} htmlFor='radio-all'>
+          全部
+        </label>
+        {Array.from(distinctTags).map((tag) => (
+          <React.Fragment key={tag}>
+            <input
+              type='radio'
+              id={`radio-${tag}`}
+              name='tabs'
+              checked={activeTag === tag}
+              onChange={() => onSetActiveTag(tag)}
+            />
+            <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
+              {tag}
+            </label>
+          </React.Fragment>
+        ))}
+
+        <span
+          className='glider'
+          style={{
+            transform: `translateX(${
+              activeTag === '全部' ? 0 : Array.from(distinctTags).indexOf(activeTag) * 100 + 100
+            }%)`,
+          }}
+        ></span>
+      </div>
+    </div>
+  );
+  // return (
+  //   <div>
+  //     <button
+  //      onClick={() => onSetActiveTag('全部')}>全部</button>
+  //     {Array.from(distinctTags).map((tag) => (
+  //       <button
+  //       key={tag} onClick={() => onSetActiveTag(tag)}>
+  //         {tag}
+  //       </button>
+  //     ))}
+  //   </div>
+  // );
 }
 
 function HistoryList(props) {
@@ -84,76 +142,84 @@ function HistoryList(props) {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  return data.map((item) => {
-    const { post, processedData, historicalInfo, isRecentPost } = item;
-    const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
-    const processInfo = processedData && processedData.length ? processedData[0] : {};
+  const [activeTag, setActiveTag] = useState('全部');
+  const filtedData = data.filter((item) => activeTag === '全部' || item.post.tag === activeTag);
+  return (
+    <>
+      <PostTabs data={data} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <div style={{ marginBottom: '20px' }}></div>
+      {filtedData.map((item) => {
+        const { post, processedData, historicalInfo, isRecentPost } = item;
+        const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
+        const processInfo = processedData && processedData.length ? processedData[0] : {};
 
-    return (
-      <div
-        key={item.stockNo}
-        style={{
-          maxWidth: '450px',
-          margin: '0 auto 30px',
-          padding: '20px',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
-          position: 'relative',
-        }}
-      >
-        {isRecentPost && (
+        return (
           <div
+            key={item.stockNo}
             style={{
-              position: 'absolute',
-              top: '-1px',
-              right: '-1px',
-              backgroundColor: '#5bbcdb',
-              color: 'white',
-              padding: '5px 10px',
+              maxWidth: '450px',
+              margin: '0 auto 30px',
+              padding: '20px',
+              border: '1px solid #ccc',
               borderRadius: '5px',
-              fontWeight: 'bold',
+              position: 'relative',
             }}
           >
-            新
-          </div>
-        )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-          {/* row 1 */}
-          <div
-            onClick={() => openNewPage(post.href)}
-            style={{
-              gridColumn: '1 / span 3',
-              textAlign: 'left',
-              cursor: 'pointer',
-              marginRight: isRecentPost ? '30px' : '0px',
-            }}
-          >
-            [{post.tag}] {post.title}👈
-          </div>
-          {/* row 2 */}
-          <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
-          {/* row 3 */}
-          <div style={{ textAlign: 'left' }}>
-            <label style={{ fontWeight: 'bold' }}>交易日</label>
-            <div>{base.date ? toYYYYMMDDWithSeparator(base.date) : '-'}</div>
-            <div>{processInfo.date ? toYYYYMMDDWithSeparator(processInfo.date) : '-'}</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <label style={{ fontWeight: 'bold' }}>股價</label>
-            <div>{base.close ? base.close.toFixed(2) : '-'}</div>
-            <div>{processInfo.price ? processInfo.price.toFixed(2) : '-'}</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <label style={{ fontWeight: 'bold' }}>差異</label>
-            <div>-</div>
-            <div>
-              {processInfo.diff} ({processInfo.diffPercent}%)
+            {isRecentPost && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-1px',
+                  right: '-1px',
+                  backgroundColor: '#5bbcdb',
+                  color: 'white',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  fontWeight: 'bold',
+                }}
+              >
+                新
+              </div>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              {/* row 1 */}
+              <div
+                onClick={() => openNewPage(post.href)}
+                style={{
+                  gridColumn: '1 / span 3',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  marginRight: isRecentPost ? '30px' : '0px',
+                }}
+              >
+                [{post.tag}] {post.title}👈
+              </div>
+              {/* row 2 */}
+              <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
+              {/* row 3 */}
+              <div style={{ textAlign: 'left' }}>
+                <label style={{ fontWeight: 'bold' }}>交易日</label>
+                <div>{base.date ? toYYYYMMDDWithSeparator(base.date) : '-'}</div>
+                <div>{processInfo.date ? toYYYYMMDDWithSeparator(processInfo.date) : '-'}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <label style={{ fontWeight: 'bold' }}>股價</label>
+                <div>{base.close ? base.close.toFixed(2) : '-'}</div>
+                <div>{processInfo.price ? processInfo.price.toFixed(2) : '-'}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <label style={{ fontWeight: 'bold' }}>差異</label>
+                <div>-</div>
+                <div>
+                  {processInfo.diff} ({processInfo.diffPercent}%)
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    );
-  });
+        );
+      })}
+    </>
+  );
 }
 
 function StockList(props) {
