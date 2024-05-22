@@ -1,5 +1,5 @@
 const isDev = process.env.NODE_ENV === 'development';
-const dataAPI = isDev ? 'http://localhost:8000' : 'https://jolly-bee-garment.cyclic.app';
+const dataAPI = isDev ? 'http://localhost:8000' : 'https://monneey-fe846abf0722.herokuapp.com';
 
 function headers() {
   return {
