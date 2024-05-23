@@ -82,7 +82,6 @@ export default function PttContainer() {
 function PostTabs(props) {
   const { data, activeTag, onSetActiveTag } = props;
   const distinctTags = new Set(data.map((item) => item.post.tag));
-  console.log(Array.from(distinctTags)); // ['標的']
   return (
     <div className='container'>
       <div className='tabs'>
@@ -122,18 +121,6 @@ function PostTabs(props) {
       </div>
     </div>
   );
-  // return (
-  //   <div>
-  //     <button
-  //      onClick={() => onSetActiveTag('全部')}>全部</button>
-  //     {Array.from(distinctTags).map((tag) => (
-  //       <button
-  //       key={tag} onClick={() => onSetActiveTag(tag)}>
-  //         {tag}
-  //       </button>
-  //     ))}
-  //   </div>
-  // );
 }
 
 function HistoryList(props) {
@@ -143,7 +130,7 @@ function HistoryList(props) {
     window.open(url, '_blank');
   };
   const [activeTag, setActiveTag] = useState('全部');
-  const filtedData = data.filter((item) => activeTag === '全部' || item.post.tag === activeTag);
+  const filtedData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
   return (
     <>
       <PostTabs data={data} activeTag={activeTag} onSetActiveTag={setActiveTag} />
@@ -155,7 +142,7 @@ function HistoryList(props) {
 
         return (
           <div
-            key={item.stockNo}
+            key={item.post.id}
             style={{
               maxWidth: '450px',
               margin: '0 auto 30px',
