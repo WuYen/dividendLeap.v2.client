@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
@@ -12,6 +12,7 @@ export default function PttContainer() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const prevPathname = useRef(location.pathname);
 
   const { url, List, pageTitleComponent } = useMemo(() => {
     let url = '';
@@ -68,13 +69,18 @@ export default function PttContainer() {
       }
     }
     fetchData();
-    return () => {};
   }, [url, navigate]);
+
+  useEffect(() => {
+    prevPathname.current = location.pathname;
+  }, [location.pathname]);
+
+  const needLoading = prevPathname.current !== location.pathname;
 
   return (
     <div className='App'>
       {pageTitleComponent}
-      {isLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
+      {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
     </div>
   );
 }
@@ -245,7 +251,9 @@ function StockList(props) {
               >
                 [{post.tag}] {post.title}
               </div>
-              <div style={{ textAlign: 'left' }}>作者: {post.author}</div>
+              <div style={{ textAlign: 'left' }}>
+                作者: <Link to={`/ptt/author/${post.author}`}>{post.author}</Link>
+              </div>
               <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
             </div>
           </div>
