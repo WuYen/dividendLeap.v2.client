@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
@@ -12,6 +12,7 @@ export default function PttContainer() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const prevPathname = useRef(location.pathname);
 
   const { url, List, pageTitleComponent } = useMemo(() => {
     let url = '';
@@ -22,7 +23,7 @@ export default function PttContainer() {
       case '/ptt':
         url = '/ptt/list';
         List = StockList;
-        pageTitleComponent = <PageTitle titleText={'PTT Stock Board'} />;
+        pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
         break;
       case '/ptt/author/list':
         url = '/ptt/author/list';
@@ -68,21 +69,25 @@ export default function PttContainer() {
       }
     }
     fetchData();
-    return () => {};
   }, [url, navigate]);
+
+  useEffect(() => {
+    prevPathname.current = location.pathname;
+  }, [location.pathname]);
+
+  const needLoading = prevPathname.current !== location.pathname;
 
   return (
     <div className='App'>
       {pageTitleComponent}
-      {isLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
+      {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
     </div>
   );
 }
 
 function PostTabs(props) {
-  const { data, activeTag, onSetActiveTag } = props;
-  const distinctTags = new Set(data.map((item) => item.post.tag));
-  console.log(Array.from(distinctTags)); // ['標的']
+  const { activeTag, onSetActiveTag, tags } = props;
+
   return (
     <div className='container'>
       <div className='tabs'>
@@ -96,7 +101,7 @@ function PostTabs(props) {
         <label className={`tab ${activeTag === '全部' ? 'active' : ''}`} htmlFor='radio-all'>
           全部
         </label>
-        {Array.from(distinctTags).map((tag) => (
+        {Array.from(tags).map((tag) => (
           <React.Fragment key={tag}>
             <input
               type='radio'
@@ -114,26 +119,12 @@ function PostTabs(props) {
         <span
           className='glider'
           style={{
-            transform: `translateX(${
-              activeTag === '全部' ? 0 : Array.from(distinctTags).indexOf(activeTag) * 100 + 100
-            }%)`,
+            transform: `translateX(${activeTag === '全部' ? 0 : Array.from(tags).indexOf(activeTag) * 100 + 100}%)`,
           }}
         ></span>
       </div>
     </div>
   );
-  // return (
-  //   <div>
-  //     <button
-  //      onClick={() => onSetActiveTag('全部')}>全部</button>
-  //     {Array.from(distinctTags).map((tag) => (
-  //       <button
-  //       key={tag} onClick={() => onSetActiveTag(tag)}>
-  //         {tag}
-  //       </button>
-  //     ))}
-  //   </div>
-  // );
 }
 
 function HistoryList(props) {
@@ -143,10 +134,11 @@ function HistoryList(props) {
     window.open(url, '_blank');
   };
   const [activeTag, setActiveTag] = useState('全部');
-  const filtedData = data.filter((item) => activeTag === '全部' || item.post.tag === activeTag);
+  const filtedData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
+  const tags = new Set(data.map((item) => item.post.tag));
   return (
     <>
-      <PostTabs data={data} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
       {filtedData.map((item) => {
         const { post, processedData, historicalInfo, isRecentPost } = item;
@@ -155,10 +147,10 @@ function HistoryList(props) {
 
         return (
           <div
-            key={item.stockNo}
+            key={item.post.id}
             style={{
               maxWidth: '450px',
-              margin: '0 auto 30px',
+              margin: '0 auto 20px',
               padding: '20px',
               border: '1px solid #ccc',
               borderRadius: '5px',
@@ -228,36 +220,47 @@ function StockList(props) {
     window.open(url, '_blank');
   };
   const { data } = props;
-  return data.map((post) => {
-    return (
-      <div
-        key={post.id}
-        style={{
-          maxWidth: '450px',
-          margin: '0 auto 30px',
-          padding: '20px',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
-          position: 'relative',
-        }}
-      >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+  const [activeTag, setActiveTag] = useState('全部');
+  const filtedData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
+  const tags = new Set(data.map((item) => item.tag));
+  return (
+    <>
+      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <div style={{ marginBottom: '20px' }}></div>
+      {filtedData.map((post) => {
+        return (
           <div
-            onClick={() => openNewPage(post.href)}
+            key={post.id}
             style={{
-              gridColumn: '1 / span 2',
-              textAlign: 'left',
-              cursor: 'pointer',
+              maxWidth: '450px',
+              margin: '0 auto 20px',
+              padding: '20px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              position: 'relative',
             }}
           >
-            [{post.tag}] {post.title}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div
+                onClick={() => openNewPage(post.href)}
+                style={{
+                  gridColumn: '1 / span 2',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                [{post.tag}] {post.title}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                作者: <Link to={`/ptt/author/${post.author}`}>{post.author}</Link>
+              </div>
+              <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
+            </div>
           </div>
-          <div style={{ textAlign: 'left' }}>作者: {post.author}</div>
-          <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
-        </div>
-      </div>
-    );
-  });
+        );
+      })}
+    </>
+  );
 }
 
 function AuthorList(props) {
@@ -268,7 +271,7 @@ function AuthorList(props) {
         key={item.name}
         style={{
           maxWidth: '450px',
-          margin: '0 auto 30px',
+          margin: '0 auto 20px',
           padding: '20px',
           border: '1px solid #ccc',
           borderRadius: '5px',

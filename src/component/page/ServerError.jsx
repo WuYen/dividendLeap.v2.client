@@ -2,8 +2,8 @@
 
 function ServerError() {
   return (
-    <div className="App">
-      <h1 style={{ marginTop: '40px', marginBottom: '40px' }}>🐒 Oops!</h1>
+    <div className='App'>
+      <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>🐒 Oops!</h1>
       <hr style={{ margin: 'auto', width: '40%' }} />
       <p>Looks like something went wrong.</p>
     </div>
