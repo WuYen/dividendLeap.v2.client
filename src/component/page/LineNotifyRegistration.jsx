@@ -10,7 +10,7 @@ export default function LineNotifyRegistration(props) {
   return (
     <div className='App'>
       <div>
-        <PageTitle titleText={'註冊 Line 通知'} />
+        <PageTitle titleText={'REGISTRATION'} />
         {isCallbackPage ? <CallbackPage /> : <AccountForm />}
       </div>
     </div>
@@ -44,9 +44,22 @@ function CallbackPage(props) {
   return (
     tokenInfoObject && (
       <div>
-        <label>註冊成功</label>
+        <div style={{ marginBottom: '20px' }}>
+          📢 說明: 解除通知請
+          <a
+            href='https://help2.line.me/line_notify/web/pc?lang=zh-Hant&contentId=20003056'
+            className='reference-link'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            參考
+          </a>
+        </div>
+        <label>恭喜</label>
         <div className='regis-item-gap-10' />
-        <label>尊貴的 {tokenInfoObject.channel} 大人</label>
+        <label>{tokenInfoObject.channel} 大大</label>
+        <div className='regis-item-gap-10' />
+        <label>註冊成功</label>
       </div>
     )
   );
@@ -130,27 +143,28 @@ export function AccountForm(props) {
     };
   }, [responseData]);
 
-  const { status } = responseData ? responseData : {};
+  var { status } = responseData ? responseData : {};
+
   return (
     <>
-      <div style={{ marginBottom: '20px' }}>📢 說明: 註冊後預設只會收到標題為 [標的] 的 Po 文</div>
+      <div style={{ marginBottom: '20px' }}>📢 說明: 註冊後會收到分類為 [標的] 的PTT股版PO文</div>
+      <div className='regis-item-gap-20' />
+      <div className='regis-item-gap-20' />
       <form onSubmit={handleSubmit}>
-        <div className='form-group'>
-          <label htmlFor='username'>你是誰👇</label>
-          <div className='regis-item-gap-10' />
-          <input
-            ref={inputRef} // Set the input reference
-            className='regis-input'
-            type='text'
-            name='username'
-            id='username'
-            value={account.username}
-            onChange={handleChange}
-            disabled={isLoading} // Disable input while loading
-            required
-          />
-        </div>
-        <div className='regis-item-gap-10' />
+        <input
+          ref={inputRef} // Set the input reference
+          className='regis-input'
+          type='text'
+          name='username'
+          id='username'
+          value={account.username}
+          onChange={handleChange}
+          disabled={isLoading} // Disable input while loading
+          required
+          placeholder='請問你的名字'
+        />
+        <div className='regis-item-gap-20' />
+        <div className='regis-item-gap-20' />
         {isLoading ? (
           <div className='regis-button'>Loading...</div>
         ) : status ? (
@@ -161,7 +175,7 @@ export function AccountForm(props) {
           </div>
         ) : (
           <button className='regis-button' type='submit'>
-            註冊
+            註冊LINE通知
           </button>
         )}
 
@@ -177,7 +191,6 @@ export function AccountForm(props) {
     </>
   );
 }
-
 // 方法1. 先打开一个空白页, 再更新它的地址
 
 // let oWindow = window.open("", "_blank");
