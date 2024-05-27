@@ -86,22 +86,13 @@ export default function PttContainer() {
 }
 
 function PostTabs(props) {
-  const { activeTag, onSetActiveTag, tags } = props;
+  const { activeTag, onSetActiveTag, containTargetPosts } = props;
 
+  const tagArray = containTargetPosts ? ['標的', '全部'] : ['全部']; //Array.from(tags).concat('全部');
   return (
     <div className='container'>
       <div className='tabs'>
-        <input
-          type='radio'
-          id='radio-all'
-          name='tabs'
-          checked={activeTag === '全部'}
-          onChange={() => onSetActiveTag('全部')}
-        />
-        <label className={`tab ${activeTag === '全部' ? 'active' : ''}`} htmlFor='radio-all'>
-          全部
-        </label>
-        {Array.from(tags).map((tag) => (
+        {tagArray.map((tag) => (
           <React.Fragment key={tag}>
             <input
               type='radio'
@@ -115,11 +106,10 @@ function PostTabs(props) {
             </label>
           </React.Fragment>
         ))}
-
         <span
           className='glider'
           style={{
-            transform: `translateX(${activeTag === '全部' ? 0 : Array.from(tags).indexOf(activeTag) * 100 + 100}%)`,
+            transform: `translateX(${(tagArray.indexOf(activeTag) - 1) * 100 + 100}%)`,
           }}
         ></span>
       </div>
@@ -133,21 +123,22 @@ function HistoryList(props) {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  const [activeTag, setActiveTag] = useState('全部');
-  const filtedData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
-  const tags = new Set(data.map((item) => item.post.tag));
+  const containTargetPosts = data.find((item) => item.post.tag === '標的');
+  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
+  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
+
   return (
     <>
-      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
-      {filtedData.map((item) => {
+      {filteredData.map((item) => {
         const { post, processedData, historicalInfo, isRecentPost } = item;
         const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
         const processInfo = processedData && processedData.length ? processedData[0] : {};
 
         return (
           <div
-            key={item.post.id}
+            key={`${item.post.id}${item.post.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
@@ -173,7 +164,13 @@ function HistoryList(props) {
                 新
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '10px',
+              }}
+            >
               {/* row 1 */}
               <div
                 onClick={() => openNewPage(post.href)}
@@ -220,17 +217,17 @@ function StockList(props) {
     window.open(url, '_blank');
   };
   const { data } = props;
-  const [activeTag, setActiveTag] = useState('全部');
-  const filtedData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
-  const tags = new Set(data.map((item) => item.tag));
+  const containTargetPosts = data.find((item) => item.tag === '標的');
+  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
+  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
   return (
     <>
-      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
-      {filtedData.map((post) => {
+      {filteredData.map((post) => {
         return (
           <div
-            key={post.id}
+            key={`${post.id}${post.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
@@ -240,7 +237,13 @@ function StockList(props) {
               position: 'relative',
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '10px',
+              }}
+            >
               <div
                 onClick={() => openNewPage(post.href)}
                 style={{

@@ -11,8 +11,8 @@ jest.mock('../../utility/api', () => ({
 describe('Test AccountForm', () => {
   test('renders loading and submit', async () => {
     render(<AccountForm />);
-    const inputField = screen.getByLabelText('你是誰👇');
-    const submitButton = screen.getByRole('button', { name: '👉 GO GO' });
+    const inputField = screen.getByPlaceholderText('請問你的名字');
+    const submitButton = screen.getByText('註冊LINE通知');
 
     // Simulate user input
     fireEvent.change(inputField, { target: { value: 'testuser' } });
@@ -37,10 +37,10 @@ describe('Test AccountForm', () => {
     render(<AccountForm />);
 
     // Simulate user input
-    const usernameInput = screen.getByLabelText('你是誰👇');
+    const usernameInput = screen.getByPlaceholderText('請問你的名字');
     fireEvent.change(usernameInput, { target: { value: 'validUsername' } });
 
-    const submitButton = screen.getByRole('button', { name: '👉 GO GO' });
+    const submitButton = screen.getByText('註冊LINE通知');
     fireEvent.click(submitButton);
 
     // Wait for the loading state to finish
@@ -60,11 +60,11 @@ describe('Test AccountForm', () => {
     render(<AccountForm />);
 
     // Simulate user input
-    const usernameInput = screen.getByLabelText('你是誰👇');
+    const usernameInput = screen.getByPlaceholderText('請問你的名字');
     fireEvent.change(usernameInput, { target: { value: 'invalidUsername' } });
 
     // Submit the form
-    const submitButton = screen.getByRole('button', { name: '👉 GO GO' });
+    const submitButton = screen.getByText('註冊LINE通知');
     fireEvent.click(submitButton);
 
     // Wait for the loading state to finish
