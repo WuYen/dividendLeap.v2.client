@@ -86,28 +86,30 @@ export default function PttContainer() {
 }
 
 function PostTabs(props) {
-  const { activeTag, onSetActiveTag, tags } = props;
+  const { activeTag, onSetActiveTag, containTargetPosts } = props;
 
+  const tagArray = containTargetPosts ? ['標的', '全部'] : ['全部']; //Array.from(tags).concat('全部');
   return (
     <div className='container'>
       <div className='tabs'>
-        <input type='radio' id='radio-all' name='tabs' checked={activeTag === '全部'} onChange={() => onSetActiveTag('全部')} />
-        <label className={`tab ${activeTag === '全部' ? 'active' : ''}`} htmlFor='radio-all'>
-          全部
-        </label>
-        {Array.from(tags).map((tag) => (
+        {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onSetActiveTag(tag)} />
+            <input
+              type='radio'
+              id={`radio-${tag}`}
+              name='tabs'
+              checked={activeTag === tag}
+              onChange={() => onSetActiveTag(tag)}
+            />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
           </React.Fragment>
         ))}
-
         <span
           className='glider'
           style={{
-            transform: `translateX(${activeTag === '全部' ? 0 : Array.from(tags).indexOf(activeTag) * 100 + 100}%)`,
+            transform: `translateX(${(tagArray.indexOf(activeTag) - 1) * 100 + 100}%)`,
           }}
         ></span>
       </div>
@@ -121,12 +123,13 @@ function HistoryList(props) {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  const [activeTag, setActiveTag] = useState('全部');
+  const containTargetPosts = data.find((item) => item.post.tag === '標的');
+  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
   const filteredData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
-  const tags = new Set(data.map((item) => item.post.tag));
+
   return (
     <>
-      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((item) => {
         const { post, processedData, historicalInfo, isRecentPost } = item;
@@ -214,12 +217,12 @@ function StockList(props) {
     window.open(url, '_blank');
   };
   const { data } = props;
-  const [activeTag, setActiveTag] = useState('全部');
+  const containTargetPosts = data.find((item) => item.tag === '標的');
+  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
   const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
-  const tags = new Set(data.map((item) => item.tag));
   return (
     <>
-      <PostTabs tags={tags} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((post) => {
         return (
@@ -298,7 +301,9 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
+      '0' + input.getDate()
+    ).slice(-2)}`;
   }
 }
 
