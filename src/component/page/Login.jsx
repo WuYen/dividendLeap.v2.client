@@ -4,51 +4,66 @@ import api from '../../utility/api';
 import './form.css';
 import PageTitle from '../common/PageTitle';
 
-export const LoginPage = () => {
-  const [account, setAccount] = useState('');
+export function LoginPage(props) {
+  return (
+    <div>
+      <PageTitle titleText={'Login'} />
+      <InputAccountAndVerifyCode />
+    </div>
+  );
+}
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+function InputAccountAndVerifyCode(props) {
+  const [channel, setChannel] = useState('');
+  const [verifyCode, setVerifyCode] = useState('');
+  const [message, setMessage] = useState('');
+  const [step, setStep] = useState(1);
 
+  const handleSendVerifyCode = async () => {
     try {
-      // 向後端發送請求,觸發發送 Line Notify
-      var response = await api.post('url', { account });
-      console.log('Line Notify sent successfully');
+      const response = await api.post('/login/account', { account });
+      setMessage(response.data.message);
+      setStep(2);
     } catch (error) {
-      console.error('An error occurred while sending Line Notify', error);
+      setMessage(error.response ? error.response.data.error : 'Error sending verify code');
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    try {
+      const response = await api.post('/login/account', { account, verifyCode });
+      setMessage(response.data.message);
+      localStorage.setItem('token', response.data.token);
+    } catch (error) {
+      setMessage(error.response ? error.response.data.error : 'Error verifying code');
     }
   };
 
   return (
-    <div>
-      <PageTitle titleText={'Login'} />
-      <form onSubmit={handleSubmit}>
-        <input type='text' placeholder='Account' value={account} onChange={(e) => setAccount(e.target.value)} />
-        <button type='submit'>Send Line Notify</button>
-      </form>
-    </div>
+    <>
+      {step === 1 && (
+        <div>
+          <input
+            type='text'
+            placeholder='Enter your account'
+            value={channel}
+            onChange={(e) => setChannel(e.target.value)}
+          />
+          <button onClick={handleSendVerifyCode}>Send Verify Code</button>
+        </div>
+      )}
+      {step === 2 && (
+        <div>
+          <input
+            type='text'
+            placeholder='Enter the verification code'
+            value={verifyCode}
+            onChange={(e) => setVerifyCode(e.target.value)}
+          />
+          <button onClick={handleVerifyCode}>Verify Code</button>
+        </div>
+      )}
+      {message && <p>{message}</p>}
+    </>
   );
-};
-
-export const LoginSuccessPage = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    const handleLogin = () => {
-      const searchParams = new URLSearchParams(location.search);
-      const jwt = searchParams.get('jwt');
-
-      if (jwt) {
-        // 將 JWT 存儲到 localStorage
-        localStorage.setItem('jwt', jwt);
-      } else {
-        // 如果沒有 JWT,則導向到登入頁面
-        window.location.href = '/login';
-      }
-    };
-
-    handleLogin();
-  }, [location]);
-
-  return <div>Login successful!</div>;
-};
+}
