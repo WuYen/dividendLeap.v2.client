@@ -2,10 +2,11 @@ const isDev = process.env.NODE_ENV === 'development';
 const dataAPI = isDev ? 'http://localhost:8000' : 'https://monneey-fe846abf0722.herokuapp.com';
 
 function headers() {
+  const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    // ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 }
 
@@ -36,7 +37,7 @@ export function post(url, payload) {
   return fetch(dataAPI + url, {
     method: 'POST',
     headers: headers(),
-    body: payload,
+    body: JSON.stringify(payload),
   })
     .then((res) => res.json())
     .then((data) => {

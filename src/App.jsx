@@ -5,6 +5,7 @@ import Home from './component/page/Home';
 import ServerError from './component/page/ServerError';
 import LineNotifyRegistration from './component/page/LineNotifyRegistration';
 import PttContainer from './component/page/PttContainer';
+import LoginPage from './component/page/Login';
 
 function App() {
   const router = createBrowserRouter([
@@ -41,6 +42,11 @@ function App() {
     {
       path: '/line/registration/callback',
       element: <LineNotifyRegistration isCallbackPage={true} />,
+      errorElement: <ServerError />,
+    },
+    {
+      path: '/login',
+      element: <LoginPage />,
       errorElement: <ServerError />,
     },
     {

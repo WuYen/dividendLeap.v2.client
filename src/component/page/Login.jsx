@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import api from '../../utility/api';
 import './form.css';
 import PageTitle from '../common/PageTitle';
 
-export function LoginPage(props) {
+export default function LoginPage(props) {
   return (
-    <div>
+    <div className='App'>
       <PageTitle titleText={'Login'} />
       <InputAccountAndVerifyCode />
     </div>
@@ -19,9 +18,9 @@ function InputAccountAndVerifyCode(props) {
   const [message, setMessage] = useState('');
   const [step, setStep] = useState(1);
 
-  const handleSendVerifyCode = async () => {
+  const handleSendVerifyCode = async (channel) => {
     try {
-      const response = await api.post('/login/account', { account });
+      const response = await api.post('/login/account', { account: channel });
       setMessage(response.data.message);
       setStep(2);
     } catch (error) {
@@ -29,9 +28,9 @@ function InputAccountAndVerifyCode(props) {
     }
   };
 
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = async (channel, verifyCode) => {
     try {
-      const response = await api.post('/login/account', { account, verifyCode });
+      const response = await api.post('/login/verify', { account: channel, verifyCode: verifyCode });
       setMessage(response.data.message);
       localStorage.setItem('token', response.data.token);
     } catch (error) {
@@ -43,24 +42,14 @@ function InputAccountAndVerifyCode(props) {
     <>
       {step === 1 && (
         <div>
-          <input
-            type='text'
-            placeholder='Enter your account'
-            value={channel}
-            onChange={(e) => setChannel(e.target.value)}
-          />
-          <button onClick={handleSendVerifyCode}>Send Verify Code</button>
+          <input type='text' placeholder='Enter your account' value={channel} onChange={(e) => setChannel(e.target.value)} />
+          <button onClick={() => handleSendVerifyCode(channel)}>Get Verify Code</button>
         </div>
       )}
       {step === 2 && (
         <div>
-          <input
-            type='text'
-            placeholder='Enter the verification code'
-            value={verifyCode}
-            onChange={(e) => setVerifyCode(e.target.value)}
-          />
-          <button onClick={handleVerifyCode}>Verify Code</button>
+          <input type='text' placeholder='Enter the verification code' value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+          <button onClick={() => handleVerifyCode(channel, verifyCode)}>Verify Code</button>
         </div>
       )}
       {message && <p>{message}</p>}
