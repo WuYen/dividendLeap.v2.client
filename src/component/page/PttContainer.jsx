@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import api from '../../utility/api';
 import TeaLoading from '../loading/TeaLoading';
 import PageTitle from '../common/PageTitle';
+import { isLoggedIn } from './Login';
 import './tab.css'; // 將 CSS 檔案引入
 
 export default function PttContainer() {
@@ -13,6 +15,11 @@ export default function PttContainer() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const prevPathname = useRef(location.pathname);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+  }, []);
 
   const { url, List, pageTitleComponent } = useMemo(() => {
     let url = '';
@@ -32,17 +39,12 @@ export default function PttContainer() {
         break;
       default:
         const refresh = searchParams.get('refresh');
-        //const token = searchParams.get('token');
-        // const handleLikeClick = () => {
-        //   api.get(`/ptt/author/${id}/like?token=${token}`);
-        // };
         url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
         List = HistoryList;
         pageTitleComponent = (
           <>
             <PageTitle titleText={`作者: ${id} 貼文`} />
             <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-            {/* {token && <div onClick={handleLikeClick}>Like</div>} */}
           </>
         );
         break;
@@ -80,7 +82,13 @@ export default function PttContainer() {
   return (
     <div className='App'>
       {pageTitleComponent}
-      {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
+      {isLoading || needLoading ? (
+        <TeaLoading />
+      ) : data.length === 0 ? (
+        <Empty />
+      ) : (
+        <List data={data} loggedIn={loggedIn} />
+      )}
     </div>
   );
 }
@@ -118,7 +126,7 @@ function PostTabs(props) {
 }
 
 function HistoryList(props) {
-  const { data } = props;
+  const { data, loggedIn } = props;
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
@@ -181,7 +189,19 @@ function HistoryList(props) {
                   marginRight: isRecentPost ? '30px' : '0px',
                 }}
               >
-                [{post.tag}] {post.title}👈
+                [{post.tag}] {post.title}👈{' '}
+                {loggedIn && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // 防止事件繼續往上層傳遞
+                      const token = localStorage.getItem('token');
+                      const decoded = jwtDecode(token);
+                      api.get(`/ptt/author/${post.author}/like?token=${decoded.id}`);
+                    }}
+                  >
+                    like
+                  </button>
+                )}
               </div>
               {/* row 2 */}
               <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>

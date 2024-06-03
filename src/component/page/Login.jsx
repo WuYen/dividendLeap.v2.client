@@ -3,6 +3,11 @@ import api from '../../utility/api';
 import './form.css';
 import PageTitle from '../common/PageTitle';
 
+export const isLoggedIn = () => {
+  const token = localStorage.getItem('token');
+  return !!token; // returns true if token exists, false otherwise
+};
+
 export default function LoginPage(props) {
   return (
     <div className='App'>
