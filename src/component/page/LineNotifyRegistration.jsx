@@ -148,8 +148,6 @@ export function AccountForm(props) {
   return (
     <>
       <div style={{ marginBottom: '20px' }}>📢 說明: 註冊後會收到分類為 [標的] 的PTT股版PO文</div>
-      <div className='regis-item-gap-20' />
-      <div className='regis-item-gap-20' />
       <form onSubmit={handleSubmit}>
         <input
           ref={inputRef} // Set the input reference
@@ -163,7 +161,6 @@ export function AccountForm(props) {
           required
           placeholder='請問你的名字'
         />
-        <div className='regis-item-gap-20' />
         <div className='regis-item-gap-20' />
         {isLoading ? (
           <div className='regis-button'>Loading...</div>
