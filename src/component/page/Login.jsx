@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import api from '../../utility/api';
-import './form.css';
 import PageTitle from '../common/PageTitle';
 
 export const isLoggedIn = () => {

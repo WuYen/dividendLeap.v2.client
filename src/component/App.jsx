@@ -1,11 +1,13 @@
-import './App.css';
+import './css/App.css';
+import './css/form.css';
+import './css/tab.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import DividendSchedule from './component/page/DividendSchedule';
-import Home from './component/page/Home';
-import ServerError from './component/page/ServerError';
-import LineNotifyRegistration from './component/page/LineNotifyRegistration';
-import PttContainer from './component/page/PttContainer';
-import LoginPage from './component/page/Login';
+import DividendSchedule from './page/DividendSchedule';
+import Home from './page/Home';
+import ServerError from './page/ServerError';
+import LineNotifyRegistration from './page/LineNotifyRegistration';
+import PttContainer from './page/PttContainer';
+import LoginPage from './page/Login';
 
 function App() {
   const router = createBrowserRouter([

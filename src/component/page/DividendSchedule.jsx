@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../utility/api';
-import Loading from '../loading/Loading';
-// import '../../App.css';
+import Loading from '../common/Loading';
 
 function DividendSchedule() {
   const [schedule, setSchedule] = useState([]);
@@ -29,7 +28,7 @@ function DividendSchedule() {
   }, []);
 
   return (
-    <div className="App">
+    <div className='App'>
       除權息預告 筆數: {schedule.length}
       {!isMobile && (
         <div>
@@ -41,7 +40,7 @@ function DividendSchedule() {
         </div>
       )}
       {isLoading ? (
-        <div className="loading-container">
+        <div className='loading-container'>
           <Loading />
         </div>
       ) : schedule.length === 0 ? (
@@ -52,7 +51,7 @@ function DividendSchedule() {
           if (isMobile && showDate) {
             return (
               <>
-                <div className="text-divider" style={{ margin: '10px 0px' }}>
+                <div className='text-divider' style={{ margin: '10px 0px' }}>
                   {data.date}
                 </div>
                 <div>
@@ -78,12 +77,12 @@ function DividendSchedule() {
 function Item(props) {
   const { data, showDate, isMobile } = props;
   return (
-    <div key={data.stockNo} style={{ margin: '5px 0px' }} className="row">
+    <div key={data.stockNo} style={{ margin: '5px 0px' }} className='row'>
       {!isMobile && (
         <div style={{ minWidth: '100px', display: 'inline-block', textAlign: 'left' }}>{showDate ? data.date : ''}</div>
       )}
       <div
-        className="hover-effect truncate-text"
+        className='hover-effect truncate-text'
         style={{ minWidth: '120px', display: 'inline-block', textAlign: 'left' }}
         onClick={() => {
           window.open(`https://www.google.com/search?q=股票${data.stockNo}`, '_blank');

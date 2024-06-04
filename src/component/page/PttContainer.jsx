@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+
 import api from '../../utility/api';
-import TeaLoading from '../loading/TeaLoading';
+import TeaLoading from '../common/TeaLoading';
 import PageTitle from '../common/PageTitle';
 import { isLoggedIn } from './Login';
-import './tab.css'; // 將 CSS 檔案引入
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -16,10 +16,6 @@ export default function PttContainer() {
   const [searchParams] = useSearchParams();
   const prevPathname = useRef(location.pathname);
   const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setLoggedIn(isLoggedIn());
-  }, []);
 
   const { url, List, pageTitleComponent } = useMemo(() => {
     let url = '';
@@ -76,6 +72,10 @@ export default function PttContainer() {
   useEffect(() => {
     prevPathname.current = location.pathname;
   }, [location.pathname]);
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+  }, []);
 
   const needLoading = prevPathname.current !== location.pathname;
 
@@ -288,25 +288,66 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
-  return data.map((item) => {
-    return (
+  const [searchText, setSearchText] = useState();
+  const navigate = useNavigate();
+  const handleSearchClick = () => {
+    if (searchText) {
+      navigate(`/ptt/author/${searchText}`);
+    }
+  };
+
+  return (
+    <>
       <div
-        key={item.name}
         style={{
           maxWidth: '450px',
           margin: '0 auto 20px',
-          padding: '20px',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
           position: 'relative',
         }}
       >
-        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-        <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-        <Link to={`/ptt/author/${item.name}`}>Link</Link>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '8fr 2fr',
+            gap: '10px',
+            alignItems: 'center',
+            placeItems: 'center',
+          }}
+        >
+          <input
+            className='text-input'
+            type='text'
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            required={true}
+            placeholder={'Search author'}
+          />
+          <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
+            查詢
+          </button>
+        </div>
       </div>
-    );
-  });
+      {data.map((item) => {
+        return (
+          <div
+            key={item.name}
+            style={{
+              maxWidth: '450px',
+              margin: '0 auto 20px',
+              padding: '20px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              position: 'relative',
+            }}
+          >
+            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
+            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
+            <Link to={`/ptt/author/${item.name}`}>Link</Link>
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 function formatDateToYYYYMMDD(timestamp) {

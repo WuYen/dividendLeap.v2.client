@@ -1,6 +1,6 @@
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import LineNotifyRegistration, { AccountForm } from './LineNotifyRegistration';
+import LineNotifyRegistration, { AccountForm } from '../page/LineNotifyRegistration';
 import * as api from '../../utility/api';
 
 // Mock the API call function

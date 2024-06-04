@@ -1,8 +1,7 @@
 // import { useEffect, useState } from 'react';
-// import './Home.css';
 
 import PageTitle from '../common/PageTitle';
-import TeaLoading from '../loading/TeaLoading';
+import TeaLoading from '../common/TeaLoading';
 
 function Home() {
   return (

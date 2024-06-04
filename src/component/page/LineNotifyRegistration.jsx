@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../utility/api';
-import './form.css';
 import PageTitle from '../common/PageTitle';
 
 export default function LineNotifyRegistration(props) {
