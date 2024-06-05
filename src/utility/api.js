@@ -16,20 +16,9 @@ export function get(url) {
     headers: headers(),
   })
     .then((res) => res.json())
-    .then((data) => {
-      return {
-        success: true,
-        data: data,
-      };
-    })
-    .catch((error) => {
-      console.error('Get ' + url + ' fail', error);
-      return {
-        success: false,
-        data: null,
-        error: error.name,
-        message: error.message,
-      };
+    .then((payload) => {
+      console.info(`get:${url}`, payload);
+      return payload;
     });
 }
 
@@ -40,20 +29,9 @@ export function post(url, payload) {
     body: JSON.stringify(payload),
   })
     .then((res) => res.json())
-    .then((data) => {
-      return {
-        success: true,
-        data: data,
-      };
-    })
-    .catch((error) => {
-      console.error('Post ' + url + ' fail', payload, error);
-      return {
-        success: false,
-        data: null,
-        error: error.name,
-        message: error.message,
-      };
+    .then((payload) => {
+      console.info(`post:${url}`, payload);
+      return payload;
     });
 }
 
