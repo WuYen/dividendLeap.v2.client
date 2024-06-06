@@ -15,7 +15,7 @@ export default function LoginPage(props) {
     </div>
   );
 }
-function InputAccountAndVerifyCode(props) {
+export function InputAccountAndVerifyCode(props) {
   const [channel, setChannel] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [message, setMessage] = useState('');
