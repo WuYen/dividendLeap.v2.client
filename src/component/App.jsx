@@ -21,7 +21,7 @@ function App() {
       errorElement: <ServerError />,
     },
     {
-      path: '/my',
+      path: '/my/*',
       element: (
         <Suspense
           fallback={

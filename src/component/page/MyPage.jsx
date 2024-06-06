@@ -1,24 +1,21 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { InputAccountAndVerifyCode } from './Login';
+import { InputAccountAndVerifyCode, getLoginStatus } from './Login';
 import PageTitle from '../common/PageTitle';
+import MyPttContainer from './MyPttContainer';
 
 export default function MyPage() {
-  useEffect(() => {
-    // async function fetchData() {
-    //   const response = await api.get(url);
-    // }
-    // fetchData();
-  }, []);
-  //TODO: find a ui library
-  //TODO: navigation
-  //TODO: login
-  //TODO: tab page
-
+  const [isLoggedIn] = getLoginStatus();
   return (
     <div className='App'>
       <PageTitle titleText={'MY PAGE'} />
-      <InputAccountAndVerifyCode />
+      {isLoggedIn ? <MainPage /> : <InputAccountAndVerifyCode />}
     </div>
   );
+}
+
+function MainPage(props) {
+  //const [isLoggedIn, userInfo] = getLoginStatus();
+
+  return <MyPttContainer />;
 }

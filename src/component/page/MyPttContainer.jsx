@@ -1,89 +1,158 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Routes, Route, useNavigate, useParams, useSearchParams, useLocation, Link } from 'react-router-dom';
 
 import api from '../../utility/api';
 import TeaLoading from '../common/TeaLoading';
-import PageTitle from '../common/PageTitle';
+import { getLoginStatus } from './Login';
 
-export default function PttContainer() {
-  const [data, setData] = useState([]);
+export default function MyPttContainer() {
+  const [posts, setPosts] = useState([]);
+  const [authorList, setAuthorList] = useState([]);
+  const [authorPosts, setAuthorPosts] = useState([]);
+  const generateUrlForPosts = () => '/ptt/list';
+  const generateUrlForAuthorList = ({ data }) => '/ptt/author/list';
+  const generateUrlForAuthorPosts = ({ id, searchParams }) => {
+    console.log('generateUrlForAuthorPosts', id, searchParams);
+    const refresh = searchParams.get('refresh');
+    return `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+  };
+
+  const navigate = useNavigate();
+  const [activeTag, setActiveTag] = useState('文章');
+  return (
+    <div className='App'>
+      <Routes>
+        <Route
+          path='/'
+          element={
+            <>
+              <div style={{ marginBottom: '20px' }}>
+                <Tabs
+                  tagArray={['文章', '作者']}
+                  activeTag={activeTag}
+                  onTabClick={(tag) => {
+                    setActiveTag(tag);
+                    if (tag === '文章') {
+                      navigate('/my');
+                    } else {
+                      navigate('/my/author/list');
+                    }
+                  }}
+                />
+              </div>
+              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={generateUrlForPosts}>
+                {({ data, ...otherArgs }) => {
+                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                }}
+              </FetchDataWrapper>
+            </>
+          }
+        />
+        <Route
+          path='/author/list'
+          element={
+            <>
+              <div style={{ marginBottom: '20px' }}>
+                <Tabs
+                  tagArray={['文章', '作者']}
+                  activeTag={activeTag}
+                  onTabClick={(tag) => {
+                    setActiveTag(tag);
+                    if (tag === '文章') {
+                      navigate('/my');
+                    } else {
+                      navigate('/my/author/list');
+                    }
+                  }}
+                />
+              </div>
+              <FetchDataWrapper data={authorList} onSetData={setAuthorList} generateUrl={generateUrlForAuthorList}>
+                {({ data, ...otherArgs }) => {
+                  return data.length === 0 ? <Empty /> : <AuthorList data={data} />;
+                }}
+              </FetchDataWrapper>
+            </>
+          }
+        />
+        <Route
+          path='/author/:id'
+          element={
+            <>
+              <FetchDataWrapper data={authorPosts} onSetData={setAuthorPosts} generateUrl={generateUrlForAuthorPosts}>
+                {({ data, ...otherArgs }) => {
+                  return (
+                    <>
+                      <div style={{ marginBottom: '20px' }}>
+                        {`作者: ${otherArgs.id} 貼文`} <button onClick={otherArgs.onBack}>Go Back</button>
+                      </div>
+                      <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
+                      {data.length === 0 ? <Empty /> : <HistoryList data={data} />}
+                    </>
+                  );
+                }}
+              </FetchDataWrapper>
+            </>
+          }
+        />
+      </Routes>
+    </div>
+  );
+}
+
+function FetchDataWrapper(props) {
+  const { data, onSetData, generateUrl } = props;
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const prevPathname = useRef(location.pathname);
-
-  const { url, List, pageTitleComponent } = useMemo(() => {
-    let url = '';
-    let List = null;
-    let pageTitleComponent = null;
-
-    switch (location.pathname) {
-      case '/ptt':
-        url = '/ptt/list';
-        List = StockList;
-        pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
-        break;
-      case '/ptt/author/list':
-        url = '/ptt/author/list';
-        List = AuthorList;
-        pageTitleComponent = <PageTitle titleText={'作者列表'} />;
-        break;
-      default:
-        const refresh = searchParams.get('refresh');
-        url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
-        List = HistoryList;
-        pageTitleComponent = (
-          <>
-            <PageTitle titleText={`作者: ${id} 貼文`} />
-            <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-          </>
-        );
-        break;
-    }
-
-    return { url, List, pageTitleComponent };
-  }, [location.pathname, id, searchParams]);
-
-  useEffect(() => {
-    async function fetchData() {
-      if (url) {
-        const response = await api.get(url);
-        console.log('fetch data', url, response);
-        if (response.success) {
-          if (response.data.posts) {
-            setData(response.data.posts);
-          } else {
-            setData(response.data);
-          }
-          setIsLoading(false);
-        } else {
-          navigate('/error');
-        }
-      }
-    }
-    fetchData();
-  }, [url, navigate]);
+  const needLoading = isLoading || prevPathname.current !== location.pathname;
+  const url = generateUrl({ data, id, searchParams });
 
   useEffect(() => {
     prevPathname.current = location.pathname;
-  }, [location.pathname]);
 
-  const needLoading = prevPathname.current !== location.pathname;
+    if (url) {
+      setIsLoading(true);
+      fetchData(url, onSetData, setIsLoading, navigate);
+    } else {
+      setIsLoading(false);
+    }
+  }, [location.pathname, navigate, onSetData, url]);
 
-  return (
-    <div className='App'>
-      {pageTitleComponent}
-      {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
-    </div>
-  );
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  return <>{needLoading ? <TeaLoading /> : props.children({ data, id, onBack: handleBack })} </>;
+}
+
+async function fetchData(url, onSetData, setIsLoading, navigate) {
+  if (url) {
+    const response = await api.get(url);
+    if (response.success) {
+      if (response.data.posts) {
+        onSetData(response.data.posts);
+      } else {
+        onSetData(response.data);
+      }
+      setIsLoading(false);
+    } else {
+      navigate('/error');
+    }
+  }
 }
 
 function PostTabs(props) {
   const { activeTag, onSetActiveTag, containTargetPosts } = props;
-
   const tagArray = containTargetPosts ? ['標的', '全部'] : ['全部']; //Array.from(tags).concat('全部');
+  return <Tabs tagArray={tagArray} activeTag={activeTag} onTabClick={onSetActiveTag} />;
+}
+
+function Tabs(props) {
+  const { tagArray, activeTag, onTabClick } = props;
+
   return (
     <div className='container'>
       <div className='tabs'>
@@ -94,7 +163,7 @@ function PostTabs(props) {
               id={`radio-${tag}`}
               name='tabs'
               checked={activeTag === tag}
-              onChange={() => onSetActiveTag(tag)}
+              onChange={() => onTabClick(tag)}
             />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
@@ -250,7 +319,7 @@ function StockList(props) {
                 [{post.tag}] {post.title}
               </div>
               <div style={{ textAlign: 'left' }}>
-                作者: <Link to={`/ptt/author/${post.author}`}>{post.author}</Link>
+                作者: <Link to={`/my/author/${post.author}`}>{post.author}</Link>
               </div>
               <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
             </div>
@@ -263,6 +332,7 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
+  const [isLoggedIn, userInfo] = getLoginStatus();
   const [searchText, setSearchText] = useState();
   const navigate = useNavigate();
   const handleSearchClick = () => {
@@ -317,7 +387,18 @@ function AuthorList(props) {
           >
             <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
             <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-            <Link to={`/ptt/author/${item.name}`}>Link</Link>
+            <button
+              style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
+              onClick={(e) => {
+                if (isLoggedIn) {
+                  e.stopPropagation(); // 防止事件繼續往上層傳遞
+                  api.get(`/ptt/author/${item.name}/like?token=${userInfo.id}`);
+                }
+              }}
+            >
+              +like
+            </button>
+            <Link to={`/my/author/${item.name}`}>Detail</Link>
           </div>
         );
       })}
