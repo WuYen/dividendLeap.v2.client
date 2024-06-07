@@ -21,12 +21,12 @@ export default function PttContainer() {
 
     switch (location.pathname) {
       case '/ptt':
-        url = '/ptt/list';
+        url = '/ptt/posts';
         List = StockList;
         pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
         break;
-      case '/ptt/author/list':
-        url = '/ptt/author/list';
+      case '/ptt/authors':
+        url = '/ptt/authors';
         List = AuthorList;
         pageTitleComponent = <PageTitle titleText={'作者列表'} />;
         break;
@@ -89,13 +89,7 @@ function PostTabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input
-              type='radio'
-              id={`radio-${tag}`}
-              name='tabs'
-              checked={activeTag === tag}
-              onChange={() => onSetActiveTag(tag)}
-            />
+            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onSetActiveTag(tag)} />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -289,14 +283,7 @@ function AuthorList(props) {
             placeItems: 'center',
           }}
         >
-          <input
-            className='text-input'
-            type='text'
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            required={true}
-            placeholder={'Search author'}
-          />
+          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
           <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
             查詢
           </button>
@@ -337,9 +324,7 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
-      '0' + input.getDate()
-    ).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
   }
 }
 

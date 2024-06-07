@@ -1,15 +1,14 @@
-import React, { Suspense, lazy } from 'react';
+import React, { lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Home from './page/Home';
-import ServerError from './page/ServerError';
-import LineNotifyRegistration from './page/LineNotifyRegistration';
-import PttContainer from './page/PttContainer';
 
 import './css/App.css';
 import './css/form.css';
 import './css/tab.css';
-import TeaLoading from './common/TeaLoading';
-import PageTitle from './common/PageTitle';
+
+import Home from './page/Home';
+import ServerError from './page/ServerError';
+import LineNotifyRegistration from './page/LineNotifyRegistration';
+import PttContainer from './page/PttContainer';
 
 const MyPage = lazy(() => import(/* webpackChunkName: "my-page" */ './page/MyPage'));
 
@@ -22,18 +21,7 @@ function App() {
     },
     {
       path: '/my/*',
-      element: (
-        <Suspense
-          fallback={
-            <div className='App'>
-              <PageTitle titleText={`MY PAGE`} />
-              <TeaLoading />
-            </div>
-          }
-        >
-          <MyPage />
-        </Suspense>
-      ),
+      element: <MyPage />,
       errorElement: <ServerError />,
     },
     {
@@ -42,7 +30,7 @@ function App() {
       errorElement: <ServerError />,
       children: [
         {
-          path: 'author/list',
+          path: 'authors',
           element: <PttContainer />,
         },
         {

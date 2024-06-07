@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import { InputAccountAndVerifyCode, getLoginStatus } from './Login';
 import PageTitle from '../common/PageTitle';
+import TeaLoading from '../common/TeaLoading';
 import MyPttContainer from './MyPttContainer';
 
 export default function MyPage() {
   const [isLoggedIn] = getLoginStatus();
   return (
-    <div className='App'>
-      <PageTitle titleText={'MY PAGE'} />
-      {isLoggedIn ? <MainPage /> : <InputAccountAndVerifyCode />}
-    </div>
+    <Suspense
+      fallback={
+        <div className='App'>
+          <PageTitle titleText={`MY PAGE`} />
+          <TeaLoading />
+        </div>
+      }
+    >
+      <div className='App'>
+        <PageTitle titleText={'MY PAGE'} />
+        {isLoggedIn ? <MainPage /> : <InputAccountAndVerifyCode />}
+      </div>
+    </Suspense>
   );
 }
 

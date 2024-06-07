@@ -9,16 +9,7 @@ export default function MyPttContainer() {
   const [posts, setPosts] = useState([]);
   const [authorList, setAuthorList] = useState([]);
   const [authorPosts, setAuthorPosts] = useState([]);
-  const generateUrlForPosts = () => '/ptt/list';
-  const generateUrlForAuthorList = ({ data }) => '/ptt/author/list';
-  const generateUrlForAuthorPosts = ({ id, searchParams }) => {
-    console.log('generateUrlForAuthorPosts', id, searchParams);
-    const refresh = searchParams.get('refresh');
-    return `/ptt/author/${id}?refresh=${refresh === 'true'}`;
-  };
 
-  const navigate = useNavigate();
-  const [activeTag, setActiveTag] = useState('文章');
   return (
     <div className='App'>
       <Routes>
@@ -26,21 +17,8 @@ export default function MyPttContainer() {
           path='/'
           element={
             <>
-              <div style={{ marginBottom: '20px' }}>
-                <Tabs
-                  tagArray={['文章', '作者']}
-                  activeTag={activeTag}
-                  onTabClick={(tag) => {
-                    setActiveTag(tag);
-                    if (tag === '文章') {
-                      navigate('/my');
-                    } else {
-                      navigate('/my/author/list');
-                    }
-                  }}
-                />
-              </div>
-              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={generateUrlForPosts}>
+              <TopNavTab />
+              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/ptt/posts'}>
                 {({ data, ...otherArgs }) => {
                   return data.length === 0 ? <Empty /> : <StockList data={data} />;
                 }}
@@ -49,24 +27,11 @@ export default function MyPttContainer() {
           }
         />
         <Route
-          path='/author/list'
+          path='/authors'
           element={
             <>
-              <div style={{ marginBottom: '20px' }}>
-                <Tabs
-                  tagArray={['文章', '作者']}
-                  activeTag={activeTag}
-                  onTabClick={(tag) => {
-                    setActiveTag(tag);
-                    if (tag === '文章') {
-                      navigate('/my');
-                    } else {
-                      navigate('/my/author/list');
-                    }
-                  }}
-                />
-              </div>
-              <FetchDataWrapper data={authorList} onSetData={setAuthorList} generateUrl={generateUrlForAuthorList}>
+              <TopNavTab />
+              <FetchDataWrapper data={authorList} onSetData={setAuthorList} generateUrl={({ data }) => '/ptt/authors'}>
                 {({ data, ...otherArgs }) => {
                   return data.length === 0 ? <Empty /> : <AuthorList data={data} />;
                 }}
@@ -78,7 +43,14 @@ export default function MyPttContainer() {
           path='/author/:id'
           element={
             <>
-              <FetchDataWrapper data={authorPosts} onSetData={setAuthorPosts} generateUrl={generateUrlForAuthorPosts}>
+              <FetchDataWrapper
+                data={authorPosts}
+                onSetData={setAuthorPosts}
+                generateUrl={({ id, searchParams }) => {
+                  const refresh = searchParams.get('refresh');
+                  return `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+                }}
+              >
                 {({ data, ...otherArgs }) => {
                   return (
                     <>
@@ -158,13 +130,7 @@ function Tabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input
-              type='radio'
-              id={`radio-${tag}`}
-              name='tabs'
-              checked={activeTag === tag}
-              onChange={() => onTabClick(tag)}
-            />
+            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onTabClick(tag)} />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -359,14 +325,7 @@ function AuthorList(props) {
             placeItems: 'center',
           }}
         >
-          <input
-            className='text-input'
-            type='text'
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            required={true}
-            placeholder={'Search author'}
-          />
+          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
           <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
             查詢
           </button>
@@ -418,9 +377,7 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
-      '0' + input.getDate()
-    ).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
   }
 }
 
@@ -431,3 +388,40 @@ function Empty(props) {
     </>
   );
 }
+
+function TopNavTab(props) {
+  const navigate = useNavigate();
+  const [activeTag, setActiveTag] = useState('文章');
+  return (
+    <div style={{ marginBottom: '20px' }}>
+      <Tabs
+        tagArray={['文章', '作者']}
+        activeTag={activeTag}
+        onTabClick={(tag) => {
+          setActiveTag(tag);
+          if (tag === '文章') {
+            navigate('/my');
+          } else {
+            navigate('/my/authors');
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+// function AddPostToWatchList(props) {
+//   const { post, userInfo } = props;
+
+//   return (
+//     <button
+//       style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
+//       onClick={(e) => {
+//         if (isLoggedIn) {
+//           e.stopPropagation(); // 防止事件繼續往上層傳遞
+//           api.get(`/ptt/author/${item.name}/like?token=${userInfo.id}`);
+//         }
+//       }}
+//     ></button>
+//   );
+// }
