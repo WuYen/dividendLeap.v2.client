@@ -17,24 +17,20 @@ export default function MyPage() {
   }, [navigate, isLoggedIn]);
 
   return (
-    <Suspense
-      fallback={
-        <div className='App'>
-          <PageTitle titleText={`MY PAGE`} />
-          <TeaLoading />
-        </div>
-      }
-    >
+    <Suspense fallback={<MyPagePreload />}>
       <div className='App'>
         <PageTitle titleText={'MY PAGE'} />
-        {isLoggedIn ? <MainPage /> : null}
+        {isLoggedIn ? <MyPttContainer /> : null}
       </div>
     </Suspense>
   );
 }
 
-function MainPage(props) {
-  //const [isLoggedIn, userInfo] = getLoginStatus();
-
-  return <MyPttContainer />;
+function MyPagePreload() {
+  return (
+    <div className='App'>
+      <PageTitle titleText={`MY PAGE`} />
+      <TeaLoading />
+    </div>
+  );
 }
