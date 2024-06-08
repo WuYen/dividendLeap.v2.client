@@ -17,8 +17,21 @@ export default function MyPttContainer() {
           path='/'
           element={
             <>
-              <TopNavTab />
-              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/ptt/posts'}>
+              <TopNavTab defaultTab='文章' />
+              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts'}>
+                {({ data, ...otherArgs }) => {
+                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                }}
+              </FetchDataWrapper>
+            </>
+          }
+        />
+        <Route
+          path='/posts'
+          element={
+            <>
+              <TopNavTab defaultTab='My文章' />
+              <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts/favorite'}>
                 {({ data, ...otherArgs }) => {
                   return data.length === 0 ? <Empty /> : <StockList data={data} />;
                 }}
@@ -30,7 +43,7 @@ export default function MyPttContainer() {
           path='/authors'
           element={
             <>
-              <TopNavTab />
+              <TopNavTab defaultTab='作者' />
               <FetchDataWrapper data={authorList} onSetData={setAuthorList} generateUrl={({ data }) => '/ptt/authors'}>
                 {({ data, ...otherArgs }) => {
                   return data.length === 0 ? <Empty /> : <AuthorList data={data} />;
@@ -130,7 +143,13 @@ function Tabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onTabClick(tag)} />
+            <input
+              type='radio'
+              id={`radio-${tag}`}
+              name='tabs'
+              checked={activeTag === tag}
+              onChange={() => onTabClick(tag)}
+            />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -203,7 +222,6 @@ function HistoryList(props) {
             >
               {/* row 1 */}
               <div
-                onClick={() => openNewPage(post.href)}
                 style={{
                   gridColumn: '1 / span 3',
                   textAlign: 'left',
@@ -211,7 +229,21 @@ function HistoryList(props) {
                   marginRight: isRecentPost ? '30px' : '0px',
                 }}
               >
-                [{post.tag}] {post.title}👈
+                <div
+                  style={{
+                    gridColumn: '1 / span 2',
+                    textAlign: 'center', // Center text horizontally
+                    cursor: 'pointer',
+                    display: 'flex', // Use flexbox
+                    alignItems: 'center', // Center content vertically
+                    columnGap: '10px',
+                  }}
+                >
+                  <FavoriteButton isFavorite={Boolean(post.isFavorite)} id={post.id} />
+                  <div onClick={() => openNewPage(post.href)}>
+                    [{post.tag}] {post.title}👈
+                  </div>
+                </div>
               </div>
               {/* row 2 */}
               <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
@@ -275,14 +307,27 @@ function StockList(props) {
               }}
             >
               <div
-                onClick={() => openNewPage(post.href)}
                 style={{
                   gridColumn: '1 / span 2',
                   textAlign: 'left',
                   cursor: 'pointer',
                 }}
               >
-                [{post.tag}] {post.title}
+                <div
+                  style={{
+                    gridColumn: '1 / span 2',
+                    textAlign: 'center', // Center text horizontally
+                    cursor: 'pointer',
+                    display: 'flex', // Use flexbox
+                    alignItems: 'center', // Center content vertically
+                    columnGap: '10px',
+                  }}
+                >
+                  <FavoriteButton isFavorite={Boolean(post.isFavorite)} id={post.id} />
+                  <div onClick={() => openNewPage(post.href)}>
+                    [{post.tag}] {post.title}
+                  </div>
+                </div>
               </div>
               <div style={{ textAlign: 'left' }}>
                 作者: <Link to={`/my/author/${post.author}`}>{post.author}</Link>
@@ -298,12 +343,12 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
-  const [isLoggedIn, userInfo] = getLoginStatus();
+  const [, userInfo] = getLoginStatus();
   const [searchText, setSearchText] = useState();
   const navigate = useNavigate();
   const handleSearchClick = () => {
     if (searchText) {
-      navigate(`/ptt/author/${searchText}`);
+      navigate(`/my/author/${searchText}`);
     }
   };
 
@@ -325,7 +370,14 @@ function AuthorList(props) {
             placeItems: 'center',
           }}
         >
-          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
+          <input
+            className='text-input'
+            type='text'
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            required={true}
+            placeholder={'Search author'}
+          />
           <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
             查詢
           </button>
@@ -345,19 +397,32 @@ function AuthorList(props) {
             }}
           >
             <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-            <button
-              style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
-              onClick={(e) => {
-                if (isLoggedIn) {
+            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>
+              <button
+                style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
+                onClick={(e) => {
                   e.stopPropagation(); // 防止事件繼續往上層傳遞
-                  api.get(`/ptt/author/${item.name}/like?token=${userInfo.id}`);
-                }
-              }}
-            >
-              +like
-            </button>
-            <Link to={`/my/author/${item.name}`}>Detail</Link>
+                  e.preventDefault();
+                  api.get(`/my/author/${item.name}/like?token=${userInfo.id}`);
+                }}
+              >
+                👍
+              </button>
+              {item.likes}
+            </span>
+            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>
+              <button
+                style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
+                onClick={(e) => {
+                  e.stopPropagation(); // 防止事件繼續往上層傳遞
+                  e.preventDefault();
+                  navigate(`/my/author/${item.name}`);
+                }}
+              >
+                Detail
+                {/* <Link to={`/my/author/${item.name}`}>Detail</Link> */}
+              </button>
+            </span>
           </div>
         );
       })}
@@ -377,7 +442,9 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
+      '0' + input.getDate()
+    ).slice(-2)}`;
   }
 }
 
@@ -391,24 +458,56 @@ function Empty(props) {
 
 function TopNavTab(props) {
   const navigate = useNavigate();
-  const [activeTag, setActiveTag] = useState('文章');
+  const [activeTag, setActiveTag] = useState(props.defaultTab);
   return (
     <div style={{ marginBottom: '20px' }}>
       <Tabs
-        tagArray={['文章', '作者']}
+        tagArray={['文章', 'My文章', '作者']}
         activeTag={activeTag}
         onTabClick={(tag) => {
           setActiveTag(tag);
           if (tag === '文章') {
             navigate('/my');
-          } else {
+          } else if (tag === '作者') {
             navigate('/my/authors');
+          } else if (tag === 'My文章') {
+            navigate('/my/posts');
           }
         }}
       />
     </div>
   );
 }
+
+const FavoriteButton = (props) => {
+  const [isFavorite, setIsFavorite] = useState(props.isFavorite);
+
+  const handleClick = async () => {
+    //api call
+    setIsFavorite(!isFavorite);
+    const response = await api.get(`/my/post/${props.id}/favorite`);
+    if (!response.success) {
+      setIsFavorite(!isFavorite);
+      alert('收藏失敗');
+    }
+  };
+
+  return (
+    <svg
+      onClick={handleClick}
+      xmlns='http://www.w3.org/2000/svg'
+      viewBox='0 0 24 24'
+      fill={isFavorite ? '#ffe5ae' : 'none'}
+      stroke={isFavorite ? 'gold' : 'gray'}
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      style={{ cursor: 'pointer', width: '24px', height: '24px' }}
+    >
+      <polygon points='12 2 15 8.7 22 9.2 17 14.1 18.5 21 12 17.5 5.5 21 7 14.1 2 9.2 9 8.7 12 2' />
+    </svg>
+  );
+};
 
 // function AddPostToWatchList(props) {
 //   const { post, userInfo } = props;
