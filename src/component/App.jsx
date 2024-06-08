@@ -1,10 +1,16 @@
-import './App.css';
+import React, { lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import DividendSchedule from './component/page/DividendSchedule';
-import Home from './component/page/Home';
-import ServerError from './component/page/ServerError';
-import LineNotifyRegistration from './component/page/LineNotifyRegistration';
-import PttContainer from './component/page/PttContainer';
+
+import './css/App.css';
+import './css/form.css';
+import './css/tab.css';
+
+import Home from './page/Home';
+import ServerError from './page/ServerError';
+import LineNotifyRegistration from './page/LineNotifyRegistration';
+import PttContainer from './page/PttContainer';
+
+const MyPage = lazy(() => import(/* webpackChunkName: "my-page" */ './page/MyPage'));
 
 function App() {
   const router = createBrowserRouter([
@@ -14,12 +20,17 @@ function App() {
       errorElement: <ServerError />,
     },
     {
+      path: '/my/*',
+      element: <MyPage />,
+      errorElement: <ServerError />,
+    },
+    {
       path: '/ptt',
       element: <PttContainer />,
       errorElement: <ServerError />,
       children: [
         {
-          path: 'author/list',
+          path: 'authors',
           element: <PttContainer />,
         },
         {
@@ -27,11 +38,6 @@ function App() {
           element: <PttContainer />,
         },
       ],
-    },
-    {
-      path: '/dividend',
-      element: <DividendSchedule />,
-      errorElement: <ServerError />,
     },
     {
       path: '/line/registration',

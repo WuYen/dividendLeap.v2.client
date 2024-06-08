@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
+
 import api from '../../utility/api';
-import TeaLoading from '../loading/TeaLoading';
+import TeaLoading from '../common/TeaLoading';
 import PageTitle from '../common/PageTitle';
-import './tab.css'; // 將 CSS 檔案引入
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -21,28 +21,23 @@ export default function PttContainer() {
 
     switch (location.pathname) {
       case '/ptt':
-        url = '/ptt/list';
+        url = '/ptt/posts';
         List = StockList;
         pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
         break;
-      case '/ptt/author/list':
-        url = '/ptt/author/list';
+      case '/ptt/authors':
+        url = '/ptt/authors';
         List = AuthorList;
         pageTitleComponent = <PageTitle titleText={'作者列表'} />;
         break;
       default:
         const refresh = searchParams.get('refresh');
-        //const token = searchParams.get('token');
-        // const handleLikeClick = () => {
-        //   api.get(`/ptt/author/${id}/like?token=${token}`);
-        // };
         url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
         List = HistoryList;
         pageTitleComponent = (
           <>
             <PageTitle titleText={`作者: ${id} 貼文`} />
             <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-            {/* {token && <div onClick={handleLikeClick}>Like</div>} */}
           </>
         );
         break;
@@ -94,13 +89,7 @@ function PostTabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input
-              type='radio'
-              id={`radio-${tag}`}
-              name='tabs'
-              checked={activeTag === tag}
-              onChange={() => onSetActiveTag(tag)}
-            />
+            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onSetActiveTag(tag)} />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -268,25 +257,59 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
-  return data.map((item) => {
-    return (
+  const [searchText, setSearchText] = useState();
+  const navigate = useNavigate();
+  const handleSearchClick = () => {
+    if (searchText) {
+      navigate(`/ptt/author/${searchText}`);
+    }
+  };
+
+  return (
+    <>
       <div
-        key={item.name}
         style={{
           maxWidth: '450px',
           margin: '0 auto 20px',
-          padding: '20px',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
           position: 'relative',
         }}
       >
-        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-        <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-        <Link to={`/ptt/author/${item.name}`}>Link</Link>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '8fr 2fr',
+            gap: '10px',
+            alignItems: 'center',
+            placeItems: 'center',
+          }}
+        >
+          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
+          <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
+            查詢
+          </button>
+        </div>
       </div>
-    );
-  });
+      {data.map((item) => {
+        return (
+          <div
+            key={item.name}
+            style={{
+              maxWidth: '450px',
+              margin: '0 auto 20px',
+              padding: '20px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              position: 'relative',
+            }}
+          >
+            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
+            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
+            <Link to={`/ptt/author/${item.name}`}>Link</Link>
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 function formatDateToYYYYMMDD(timestamp) {
@@ -301,9 +324,7 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
-      '0' + input.getDate()
-    ).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
   }
 }
 
