@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
+
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
-import { jwtDecode } from 'jwt-decode';
 
 export const getLoginStatus = () => {
   const token = localStorage.getItem('token');
@@ -22,6 +24,7 @@ export function InputAccountAndVerifyCode(props) {
   const [verifyCode, setVerifyCode] = useState('');
   const [message, setMessage] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const navigate = useNavigate();
 
   const handleSendVerifyCode = async () => {
     try {
@@ -38,6 +41,9 @@ export function InputAccountAndVerifyCode(props) {
       const response = await api.post('/login/verify', { account: channel, verifyCode: verifyCode });
       setMessage(response.message);
       localStorage.setItem('token', response.data);
+      setTimeout(() => {
+        navigate(`/my`, { replace: true });
+      }, 2000);
     } catch (error) {
       setMessage('驗證失敗');
     }

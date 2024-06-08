@@ -9,6 +9,7 @@ import Home from './page/Home';
 import ServerError from './page/ServerError';
 import LineNotifyRegistration from './page/LineNotifyRegistration';
 import PttContainer from './page/PttContainer';
+import LoginPage from './page/Login';
 
 const MyPage = lazy(() => import(/* webpackChunkName: "my-page" */ './page/MyPage'));
 
@@ -17,6 +18,11 @@ function App() {
     {
       path: '/',
       element: <Home />,
+      errorElement: <ServerError />,
+    },
+    {
+      path: '/login',
+      element: <LoginPage />,
       errorElement: <ServerError />,
     },
     {
