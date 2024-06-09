@@ -22,7 +22,7 @@ export default function PttContainer() {
     switch (location.pathname) {
       case '/ptt':
         url = '/ptt/posts';
-        List = StockList;
+        List = PostList;
         pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
         break;
       case '/ptt/authors':
@@ -89,7 +89,13 @@ function PostTabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onSetActiveTag(tag)} />
+            <input
+              type='radio'
+              id={`radio-${tag}`}
+              name='tabs'
+              checked={activeTag === tag}
+              onChange={() => onSetActiveTag(tag)}
+            />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -112,9 +118,9 @@ function HistoryList(props) {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  const containTargetPosts = data.find((item) => item.post.tag === '標的');
+  const containTargetPosts = data.find((item) => item.tag === '標的');
   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
+  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
 
   return (
     <>
@@ -127,7 +133,7 @@ function HistoryList(props) {
 
         return (
           <div
-            key={`${item.post.id}${item.post.batchNo}`}
+            key={`${item.id}${item.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
@@ -200,7 +206,7 @@ function HistoryList(props) {
   );
 }
 
-function StockList(props) {
+function PostList(props) {
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
@@ -283,7 +289,14 @@ function AuthorList(props) {
             placeItems: 'center',
           }}
         >
-          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
+          <input
+            className='text-input'
+            type='text'
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            required={true}
+            placeholder={'Search author'}
+          />
           <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
             查詢
           </button>
@@ -324,7 +337,9 @@ function toYYYYMMDDWithSeparator(input, separator = '-') {
   if (typeof input == 'string') {
     return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
   } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${('0' + input.getDate()).slice(-2)}`;
+    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
+      '0' + input.getDate()
+    ).slice(-2)}`;
   }
 }
 

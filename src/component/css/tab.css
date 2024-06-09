@@ -43,8 +43,8 @@ input[type='radio'] {
   align-items: center;
   justify-content: center;
   height: 25px;
-  width: 60px;
-  min-width: 60px;
+  width: 66px;
+  min-width: 66px;
   font-weight: 500;
   border-radius: 99px;
   cursor: pointer;
@@ -76,8 +76,8 @@ input[type='radio'] {
   position: absolute;
   display: flex;
   height: 25px;
-  width: 60px;
-  min-width: 60px;
+  width: 66px;
+  min-width: 66px;
   background-color: var(--secondary-color);
   z-index: 1;
   border-radius: 99px;

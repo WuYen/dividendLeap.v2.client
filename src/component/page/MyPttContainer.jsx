@@ -20,7 +20,7 @@ export default function MyPttContainer() {
               <TopNavTab defaultTab='文章' />
               <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts'}>
                 {({ data, ...otherArgs }) => {
-                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                  return data.length === 0 ? <Empty /> : <PostList data={data} />;
                 }}
               </FetchDataWrapper>
             </>
@@ -33,7 +33,7 @@ export default function MyPttContainer() {
               <TopNavTab defaultTab='My文章' />
               <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts/favorite'}>
                 {({ data, ...otherArgs }) => {
-                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                  return data.length === 0 ? <Empty /> : <HistoryList data={data} isMyList={true} />;
                 }}
               </FetchDataWrapper>
             </>
@@ -73,12 +73,6 @@ export default function MyPttContainer() {
                         </div>
                         <div style={headerStyles.text}>作者: {otherArgs.id} 貼文</div>
                       </div>
-                      {/* <div style={{ marginBottom: '20px' }}>
-                        {`作者: ${otherArgs.id} 貼文`}
-                        <div style={styles.arrowContainer} onClick={otherArgs.onBack}>
-                          <BackButton />
-                        </div>
-                      </div> */}
                       <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
                       {data.length === 0 ? <Empty /> : <HistoryList data={data} />}
                     </>
@@ -204,27 +198,32 @@ function Tabs(props) {
 }
 
 function HistoryList(props) {
-  const { data } = props;
+  const { data, isMyList } = props;
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  const containTargetPosts = data.find((item) => item.post.tag === '標的');
+  const containTargetPosts = data.find((item) => item.tag === '標的');
   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
+  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
 
   return (
     <>
       <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
-      {filteredData.map((item) => {
-        const { post, processedData, historicalInfo, isRecentPost } = item;
-        const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
-        const processInfo = processedData && processedData.length ? processedData[0] : {};
+      {filteredData.map((postInfo) => {
+        const { processedData, historicalInfo, isRecentPost } = postInfo;
+        const baseDateInfo = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
+        let hight = processedData && processedData.length ? processedData[0] : {};
+        let latest = {};
+        if (isMyList && processedData && processedData.length) {
+          hight = processedData.find((x) => x.type === 'highest');
+          latest = processedData.find((x) => x.type === 'latest');
+        }
 
         return (
           <div
-            key={`${item.post.id}${item.post.batchNo}`}
+            key={`${postInfo.id}${postInfo.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
@@ -268,7 +267,7 @@ function HistoryList(props) {
               >
                 <div
                   style={{
-                    gridColumn: '1 / span 2',
+                    gridColumn: '1 / span 3',
                     textAlign: 'center', // Center text horizontally
                     cursor: 'pointer',
                     display: 'flex', // Use flexbox
@@ -276,32 +275,99 @@ function HistoryList(props) {
                     columnGap: '10px',
                   }}
                 >
-                  <FavoriteButton isFavorite={Boolean(post.isFavorite)} id={post.id} />
-                  <div onClick={() => openNewPage(post.href)}>
-                    [{post.tag}] {post.title}👈
+                  <FavoriteButton isFavorite={Boolean(postInfo.isFavorite)} id={postInfo.id} />
+                  <div onClick={() => openNewPage(postInfo.href)}>
+                    [{postInfo.tag}] {postInfo.title}👈
                   </div>
                 </div>
               </div>
               {/* row 2 */}
-              <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
-              {/* row 3 */}
-              <div style={{ textAlign: 'left' }}>
-                <label style={{ fontWeight: 'bold' }}>交易日</label>
-                <div>{base.date ? toYYYYMMDDWithSeparator(base.date) : '-'}</div>
-                <div>{processInfo.date ? toYYYYMMDDWithSeparator(processInfo.date) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>股價</label>
-                <div>{base.close ? base.close.toFixed(2) : '-'}</div>
-                <div>{processInfo.price ? processInfo.price.toFixed(2) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>差異</label>
-                <div>-</div>
-                <div>
-                  {processInfo.diff} ({processInfo.diffPercent}%)
+
+              {isMyList ? (
+                <div
+                  style={{
+                    gridColumn: '1 / span 3',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div>
+                    作者: <Link to={`/my/author/${postInfo.author}`}>{postInfo.author}</Link>
+                  </div>
+                  <div>日期: {formatDateToYYYYMMDD(postInfo.id)}</div>
                 </div>
-              </div>
+              ) : (
+                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(postInfo.id)} </div>
+              )}
+
+              {isMyList ? (
+                <>
+                  {/* row 3 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>基準日</label>
+                    <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>-</div>
+                  </div>
+                  {/* row 4 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>四個月內最高</label>
+                    <div>{hight.date ? `${toYYYYMMDDWithSeparator(hight.date)}` : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>
+                      {hight.diff} ({hight.diffPercent}%)
+                    </div>
+                  </div>
+                  {/* row 5 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>最近一個交易日</label>
+                    <div>{latest.date ? `${toYYYYMMDDWithSeparator(latest.date)}` : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{latest.price ? latest.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>
+                      {latest.diff} ({latest.diffPercent}%)
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>交易日</label>
+                    <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
+                    <div>{hight.date ? toYYYYMMDDWithSeparator(hight.date) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
+                    <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>-</div>
+                    <div>
+                      {hight.diff} ({hight.diffPercent}%)
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         );
@@ -310,7 +376,7 @@ function HistoryList(props) {
   );
 }
 
-function StockList(props) {
+function PostList(props) {
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
@@ -369,7 +435,7 @@ function StockList(props) {
               <div style={{ textAlign: 'left' }}>
                 作者: <Link to={`/my/author/${post.author}`}>{post.author}</Link>
               </div>
-              <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
+              <div style={{ textAlign: 'left' }}>日期: {formatDateToYYYYMMDD(post.id)}</div>
             </div>
           </div>
         );
@@ -380,7 +446,6 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
-  const [, userInfo] = getLoginStatus();
   const [searchText, setSearchText] = useState();
   const navigate = useNavigate();
   const handleSearchClick = () => {
@@ -457,7 +522,7 @@ function TopNavTab(props) {
   const navigate = useNavigate();
   const [activeTag, setActiveTag] = useState(props.defaultTab);
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div style={{ marginBottom: '10px' }}>
       <Tabs
         tagArray={['文章', 'My文章', '作者']}
         activeTag={activeTag}
@@ -610,13 +675,13 @@ const ThumbUpIcon = () => (
     width='24px'
     height='24px'
     viewBox='0 0 1024.00 1024.00'
-    class='icon'
+    className='icon'
     version='1.1'
     xmlns='http://www.w3.org/2000/svg'
     fill='#000000'
   >
-    <g id='SVGRepo_bgCarrier' stroke-width='0'></g>
-    <g id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'></g>
+    <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
+    <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
     <g id='SVGRepo_iconCarrier'>
       <path d='M601.5 531.8h278.8v16H601.5zM639.3 657.4h224v16h-224zM686.8 779h160.8v16H686.8z' fill='#F73737'></path>
       <path
@@ -629,8 +694,8 @@ const ThumbUpIcon = () => (
 
 const BackButton = () => (
   <svg width='24px' height='24px' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='#000000'>
-    <g id='SVGRepo_bgCarrier' stroke-width='0'></g>
-    <g id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'></g>
+    <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
+    <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
     <g id='SVGRepo_iconCarrier'>
       <title></title>
       <g id='Complete'>
@@ -640,9 +705,9 @@ const BackButton = () => (
             id='Left'
             points='15.5 5 8.5 12 15.5 19'
             stroke='#000000'
-            stroke-linecap='round'
-            stroke-linejoin='round'
-            stroke-width='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth='2'
           ></polyline>
         </g>
       </g>
