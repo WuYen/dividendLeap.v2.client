@@ -3,7 +3,6 @@ import { Routes, Route, useNavigate, useParams, useSearchParams, useLocation, Li
 
 import api from '../../utility/api';
 import TeaLoading from '../common/TeaLoading';
-import { getLoginStatus } from './Login';
 
 export default function MyPttContainer() {
   const [posts, setPosts] = useState([]);
