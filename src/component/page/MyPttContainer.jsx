@@ -20,7 +20,7 @@ export default function MyPttContainer() {
               <TopNavTab defaultTab='文章' />
               <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts'}>
                 {({ data, ...otherArgs }) => {
-                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                  return data.length === 0 ? <Empty /> : <PostList data={data} />;
                 }}
               </FetchDataWrapper>
             </>
@@ -33,7 +33,7 @@ export default function MyPttContainer() {
               <TopNavTab defaultTab='My文章' />
               <FetchDataWrapper data={posts} onSetData={setPosts} generateUrl={() => '/my/posts/favorite'}>
                 {({ data, ...otherArgs }) => {
-                  return data.length === 0 ? <Empty /> : <StockList data={data} />;
+                  return data.length === 0 ? <Empty /> : <HistoryList data={data} isMyList={true} />;
                 }}
               </FetchDataWrapper>
             </>
@@ -67,10 +67,13 @@ export default function MyPttContainer() {
                 {({ data, ...otherArgs }) => {
                   return (
                     <>
-                      <div style={{ marginBottom: '20px' }}>
-                        {`作者: ${otherArgs.id} 貼文`} <button onClick={otherArgs.onBack}>Go Back</button>
+                      <div style={headerStyles.container}>
+                        <div style={headerStyles.arrowContainer} onClick={otherArgs.onBack}>
+                          <BackButton /> BACK
+                        </div>
+                        <div style={headerStyles.text}>作者: {otherArgs.id} 貼文</div>
                       </div>
-                      <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
+                      <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
                       {data.length === 0 ? <Empty /> : <HistoryList data={data} />}
                     </>
                   );
@@ -84,6 +87,34 @@ export default function MyPttContainer() {
   );
 }
 
+const headerStyles = {
+  container: {
+    maxWidth: '450px',
+    margin: '0 auto 15px', // Centering with margin auto and adding bottom margin
+    position: 'relative',
+  },
+  arrowContainer: {
+    position: 'absolute',
+    left: '0',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    cursor: 'pointer',
+    display: 'flex',
+    borderRadius: '99px',
+    border: '1px solid #ccc',
+    padding: '4px 12px 4px 4px',
+  },
+  backButton: {
+    width: '24px',
+    height: '24px',
+  },
+  text: {
+    fontSize: '20px',
+    textAlign: 'center',
+    paddingLeft: '24px', // To ensure text doesn't overlap with the back button
+    paddingRight: '24px', // Optional: if you want some space on the right side as well
+  },
+};
 function FetchDataWrapper(props) {
   const { data, onSetData, generateUrl } = props;
   const [isLoading, setIsLoading] = useState(true);
@@ -167,27 +198,32 @@ function Tabs(props) {
 }
 
 function HistoryList(props) {
-  const { data } = props;
+  const { data, isMyList } = props;
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
   };
-  const containTargetPosts = data.find((item) => item.post.tag === '標的');
+  const containTargetPosts = data.find((item) => item.tag === '標的');
   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.post.tag === activeTag);
+  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
 
   return (
     <>
       <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
-      {filteredData.map((item) => {
-        const { post, processedData, historicalInfo, isRecentPost } = item;
-        const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
-        const processInfo = processedData && processedData.length ? processedData[0] : {};
+      {filteredData.map((postInfo) => {
+        const { processedData, historicalInfo, isRecentPost } = postInfo;
+        const baseDateInfo = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
+        let hight = processedData && processedData.length ? processedData[0] : {};
+        let latest = {};
+        if (isMyList && processedData && processedData.length) {
+          hight = processedData.find((x) => x.type === 'highest');
+          latest = processedData.find((x) => x.type === 'latest');
+        }
 
         return (
           <div
-            key={`${item.post.id}${item.post.batchNo}`}
+            key={`${postInfo.id}${postInfo.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
@@ -231,7 +267,7 @@ function HistoryList(props) {
               >
                 <div
                   style={{
-                    gridColumn: '1 / span 2',
+                    gridColumn: '1 / span 3',
                     textAlign: 'center', // Center text horizontally
                     cursor: 'pointer',
                     display: 'flex', // Use flexbox
@@ -239,32 +275,99 @@ function HistoryList(props) {
                     columnGap: '10px',
                   }}
                 >
-                  <FavoriteButton isFavorite={Boolean(post.isFavorite)} id={post.id} />
-                  <div onClick={() => openNewPage(post.href)}>
-                    [{post.tag}] {post.title}👈
+                  <FavoriteButton isFavorite={Boolean(postInfo.isFavorite)} id={postInfo.id} />
+                  <div onClick={() => openNewPage(postInfo.href)}>
+                    [{postInfo.tag}] {postInfo.title}👈
                   </div>
                 </div>
               </div>
               {/* row 2 */}
-              <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
-              {/* row 3 */}
-              <div style={{ textAlign: 'left' }}>
-                <label style={{ fontWeight: 'bold' }}>交易日</label>
-                <div>{base.date ? toYYYYMMDDWithSeparator(base.date) : '-'}</div>
-                <div>{processInfo.date ? toYYYYMMDDWithSeparator(processInfo.date) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>股價</label>
-                <div>{base.close ? base.close.toFixed(2) : '-'}</div>
-                <div>{processInfo.price ? processInfo.price.toFixed(2) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>差異</label>
-                <div>-</div>
-                <div>
-                  {processInfo.diff} ({processInfo.diffPercent}%)
+
+              {isMyList ? (
+                <div
+                  style={{
+                    gridColumn: '1 / span 3',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div>
+                    作者: <Link to={`/my/author/${postInfo.author}`}>{postInfo.author}</Link>
+                  </div>
+                  <div>日期: {formatDateToYYYYMMDD(postInfo.id)}</div>
                 </div>
-              </div>
+              ) : (
+                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(postInfo.id)} </div>
+              )}
+
+              {isMyList ? (
+                <>
+                  {/* row 3 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>基準日</label>
+                    <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>-</div>
+                  </div>
+                  {/* row 4 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>四個月內最高</label>
+                    <div>{hight.date ? `${toYYYYMMDDWithSeparator(hight.date)}` : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>
+                      {hight.diff} ({hight.diffPercent}%)
+                    </div>
+                  </div>
+                  {/* row 5 */}
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>最近一個交易日</label>
+                    <div>{latest.date ? `${toYYYYMMDDWithSeparator(latest.date)}` : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{latest.price ? latest.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>
+                      {latest.diff} ({latest.diffPercent}%)
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ textAlign: 'left' }}>
+                    <label style={{ fontWeight: 'bold' }}>交易日</label>
+                    <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
+                    <div>{hight.date ? toYYYYMMDDWithSeparator(hight.date) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>股價</label>
+                    <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
+                    <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <label style={{ fontWeight: 'bold' }}>差異</label>
+                    <div>-</div>
+                    <div>
+                      {hight.diff} ({hight.diffPercent}%)
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         );
@@ -273,7 +376,7 @@ function HistoryList(props) {
   );
 }
 
-function StockList(props) {
+function PostList(props) {
   const openNewPage = (path) => {
     const url = `https://www.ptt.cc/${path}`;
     window.open(url, '_blank');
@@ -332,7 +435,7 @@ function StockList(props) {
               <div style={{ textAlign: 'left' }}>
                 作者: <Link to={`/my/author/${post.author}`}>{post.author}</Link>
               </div>
-              <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
+              <div style={{ textAlign: 'left' }}>日期: {formatDateToYYYYMMDD(post.id)}</div>
             </div>
           </div>
         );
@@ -343,7 +446,6 @@ function StockList(props) {
 
 function AuthorList(props) {
   const { data } = props;
-  const [, userInfo] = getLoginStatus();
   const [searchText, setSearchText] = useState();
   const navigate = useNavigate();
   const handleSearchClick = () => {
@@ -383,49 +485,9 @@ function AuthorList(props) {
           </button>
         </div>
       </div>
-      {data.map((item) => {
-        return (
-          <div
-            key={item.name}
-            style={{
-              maxWidth: '450px',
-              margin: '0 auto 20px',
-              padding: '20px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              position: 'relative',
-            }}
-          >
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>
-              <button
-                style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
-                onClick={(e) => {
-                  e.stopPropagation(); // 防止事件繼續往上層傳遞
-                  e.preventDefault();
-                  api.get(`/my/author/${item.name}/like?token=${userInfo.id}`);
-                }}
-              >
-                👍
-              </button>
-              {item.likes}
-            </span>
-            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>
-              <button
-                style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
-                onClick={(e) => {
-                  e.stopPropagation(); // 防止事件繼續往上層傳遞
-                  e.preventDefault();
-                  navigate(`/my/author/${item.name}`);
-                }}
-              >
-                Detail
-                {/* <Link to={`/my/author/${item.name}`}>Detail</Link> */}
-              </button>
-            </span>
-          </div>
-        );
-      })}
+      {data.map((item) => (
+        <AuthorListItem key={item.name} authoInfo={item} navigate={navigate} />
+      ))}
     </>
   );
 }
@@ -460,7 +522,7 @@ function TopNavTab(props) {
   const navigate = useNavigate();
   const [activeTag, setActiveTag] = useState(props.defaultTab);
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div style={{ marginBottom: '10px' }}>
       <Tabs
         tagArray={['文章', 'My文章', '作者']}
         activeTag={activeTag}
@@ -483,7 +545,6 @@ const FavoriteButton = (props) => {
   const [isFavorite, setIsFavorite] = useState(props.isFavorite);
 
   const handleClick = async () => {
-    //api call
     setIsFavorite(!isFavorite);
     const response = await api.get(`/my/post/${props.id}/favorite`);
     if (!response.success) {
@@ -509,18 +570,147 @@ const FavoriteButton = (props) => {
   );
 };
 
-// function AddPostToWatchList(props) {
-//   const { post, userInfo } = props;
+const AuthorListItem = (props) => {
+  const { authoInfo, navigate } = props;
+  const handleArrowClick = (e) => {
+    e.stopPropagation(); // 防止事件繼續往上層傳遞
+    e.preventDefault();
+    navigate(`/my/author/${authoInfo.name}`);
+  };
+  const handleLikeClick = (e) => {
+    // e.stopPropagation(); // 防止事件繼續往上層傳遞
+    // e.preventDefault();
+    // api.get(`/my/author/${item.name}/like?token=${userInfo.id}`);
+  };
+  return (
+    <div style={styles.container}>
+      <div style={styles.textContainer}>
+        <div style={styles.headerContainer}>
+          <div style={styles.likeContainer} onClick={(e) => handleLikeClick(e)}>
+            <ThumbUpIcon />
+            <span style={styles.likeCount}> {authoInfo.likes}</span>
+          </div>
+          <div style={styles.text}>{authoInfo.name}</div>
+        </div>
+      </div>
+      <div style={styles.arrowContainer} onClick={(e) => handleArrowClick(e)}>
+        <ArrowIcon />
+      </div>
+    </div>
+  );
+};
 
-//   return (
-//     <button
-//       style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}
-//       onClick={(e) => {
-//         if (isLoggedIn) {
-//           e.stopPropagation(); // 防止事件繼續往上層傳遞
-//           api.get(`/ptt/author/${item.name}/like?token=${userInfo.id}`);
-//         }
-//       }}
-//     ></button>
-//   );
-// }
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: '20px 12px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    margin: '0px auto 20px',
+    maxWidth: '450px',
+    textAlign: 'left',
+  },
+  textContainer: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  headerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  text: {
+    fontWeight: 'bold',
+    fontSize: '16px',
+    marginLeft: '8px',
+  },
+  arrowContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  arrowIcon: {
+    width: '24px',
+    height: '24px',
+  },
+  actionContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  likeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    marginRight: '12px',
+    marginLeft: '8px',
+  },
+  likeCount: {
+    marginLeft: '4px',
+    fontSize: '16px',
+    paddingTop: '2px',
+    color: 'gray',
+  },
+  thumbUpIcon: {
+    width: '20px',
+    height: '20px',
+  },
+};
+
+const ArrowIcon = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' style={styles.arrowIcon}>
+    <path
+      fillRule='evenodd'
+      d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z'
+      clipRule='evenodd'
+    />
+  </svg>
+);
+
+const ThumbUpIcon = () => (
+  <svg
+    width='24px'
+    height='24px'
+    viewBox='0 0 1024.00 1024.00'
+    className='icon'
+    version='1.1'
+    xmlns='http://www.w3.org/2000/svg'
+    fill='#000000'
+  >
+    <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
+    <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
+    <g id='SVGRepo_iconCarrier'>
+      <path d='M601.5 531.8h278.8v16H601.5zM639.3 657.4h224v16h-224zM686.8 779h160.8v16H686.8z' fill='#F73737'></path>
+      <path
+        d='M216.3 927.8H62.2V425.6h155.4l-1.3 502.2z m-110.1-44h66.2l1.1-414.2h-67.3v414.2zM822.1 927.8H268.9l-0.4-502L633.3 96.2l85.2 91.5-66.8 196.7h310L822.1 927.8z m-509.3-44H788l117-455.4H655.8l-65.5-0.1 78.1-229.9-37.8-40.5-318.1 287.4 0.3 438.5z'
+        fill='#353535'
+      ></path>
+    </g>
+  </svg>
+);
+
+const BackButton = () => (
+  <svg width='24px' height='24px' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='#000000'>
+    <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
+    <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
+    <g id='SVGRepo_iconCarrier'>
+      <title></title>
+      <g id='Complete'>
+        <g id='F-Chevron'>
+          <polyline
+            fill='none'
+            id='Left'
+            points='15.5 5 8.5 12 15.5 19'
+            stroke='#000000'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth='2'
+          ></polyline>
+        </g>
+      </g>
+    </g>
+  </svg>
+);

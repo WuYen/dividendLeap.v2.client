@@ -5,7 +5,7 @@ export default function PageTitle(props) {
 
   return (
     <>
-      <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>{titleText}</h1>
+      <h1 style={{ marginTop: '10px', marginBottom: '10px' }}>{titleText}</h1>
       <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px', marginBottom: '20px' }} />
     </>
   );
