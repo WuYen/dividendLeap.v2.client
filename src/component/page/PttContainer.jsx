@@ -126,14 +126,14 @@ function HistoryList(props) {
     <>
       <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
-      {filteredData.map((item) => {
-        const { post, processedData, historicalInfo, isRecentPost } = item;
+      {filteredData.map((post) => {
+        const { processedData, historicalInfo, isRecentPost } = post;
         const base = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
         const processInfo = processedData && processedData.length ? processedData[0] : {};
 
         return (
           <div
-            key={`${item.id}${item.batchNo}`}
+            key={`${post.id}${post.batchNo}`}
             style={{
               maxWidth: '450px',
               margin: '0 auto 20px',
