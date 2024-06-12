@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Routes, Route, useNavigate, useParams, useSearchParams, useLocation, Link } from 'react-router-dom';
 
 import api from '../../utility/api';
+import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
+
 import TeaLoading from '../common/TeaLoading';
 
 export default function MyPttContainer() {
@@ -294,10 +296,12 @@ function HistoryList(props) {
                   <div>
                     作者: <Link to={`/my/author/${postInfo.author}`}>{postInfo.author}</Link>
                   </div>
-                  <div>日期: {formatDateToYYYYMMDD(postInfo.id)}</div>
+                  <div>日期: {toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}</div>
                 </div>
               ) : (
-                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(postInfo.id)} </div>
+                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>
+                  {toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}
+                </div>
               )}
 
               {isMyList ? (
@@ -434,7 +438,7 @@ function PostList(props) {
               <div style={{ textAlign: 'left' }}>
                 作者: <Link to={`/my/author/${post.author}`}>{post.author}</Link>
               </div>
-              <div style={{ textAlign: 'left' }}>日期: {formatDateToYYYYMMDD(post.id)}</div>
+              <div style={{ textAlign: 'left' }}>日期: {toYYYYMMDDWithSeparator(new Date(post.id * 1000))}</div>
             </div>
           </div>
         );
@@ -489,24 +493,6 @@ function AuthorList(props) {
       ))}
     </>
   );
-}
-
-function formatDateToYYYYMMDD(timestamp) {
-  const date = new Date(timestamp * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function toYYYYMMDDWithSeparator(input, separator = '-') {
-  if (typeof input == 'string') {
-    return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
-  } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
-      '0' + input.getDate()
-    ).slice(-2)}`;
-  }
 }
 
 function Empty(props) {
@@ -632,10 +618,6 @@ const styles = {
     alignItems: 'center',
     cursor: 'pointer',
   },
-  arrowIcon: {
-    width: '24px',
-    height: '24px',
-  },
   actionContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -660,7 +642,7 @@ const styles = {
 };
 
 const ArrowIcon = () => (
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' style={styles.arrowIcon}>
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24px' height='24px' fill='currentColor'>
     <path
       fillRule='evenodd'
       d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z'

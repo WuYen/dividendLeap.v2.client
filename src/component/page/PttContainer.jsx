@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 import api from '../../utility/api';
 import TeaLoading from '../common/TeaLoading';
 import PageTitle from '../common/PageTitle';
+import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -13,38 +14,8 @@ export default function PttContainer() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const prevPathname = useRef(location.pathname);
-
-  const { url, List, pageTitleComponent } = useMemo(() => {
-    let url = '';
-    let List = null;
-    let pageTitleComponent = null;
-
-    switch (location.pathname) {
-      case '/ptt':
-        url = '/ptt/posts';
-        List = PostList;
-        pageTitleComponent = <PageTitle titleText={'Stock Board'} />;
-        break;
-      case '/ptt/authors':
-        url = '/ptt/authors';
-        List = AuthorList;
-        pageTitleComponent = <PageTitle titleText={'作者列表'} />;
-        break;
-      default:
-        const refresh = searchParams.get('refresh');
-        url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
-        List = HistoryList;
-        pageTitleComponent = (
-          <>
-            <PageTitle titleText={`作者: ${id} 貼文`} />
-            <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-          </>
-        );
-        break;
-    }
-
-    return { url, List, pageTitleComponent };
-  }, [location.pathname, id, searchParams]);
+  const refresh = searchParams.get('refresh');
+  const url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
 
   useEffect(() => {
     async function fetchData() {
@@ -52,11 +23,7 @@ export default function PttContainer() {
         const response = await api.get(url);
         console.log('fetch data', url, response);
         if (response.success) {
-          if (response.data.posts) {
-            setData(response.data.posts);
-          } else {
-            setData(response.data);
-          }
+          setData(response.data);
           setIsLoading(false);
         } else {
           navigate('/error');
@@ -74,8 +41,15 @@ export default function PttContainer() {
 
   return (
     <div className='App'>
-      {pageTitleComponent}
-      {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <Empty /> : <List data={data} />}
+      <PageTitle titleText={`作者: ${id} 貼文`} />
+      <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
+      {isLoading || needLoading ? (
+        <TeaLoading />
+      ) : data.length === 0 ? (
+        <label>無資料</label>
+      ) : (
+        <HistoryList data={data} />
+      )}
     </div>
   );
 }
@@ -179,7 +153,9 @@ function HistoryList(props) {
                 [{post.tag}] {post.title}👈
               </div>
               {/* row 2 */}
-              <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{formatDateToYYYYMMDD(post.id)}</div>
+              <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>
+                {toYYYYMMDDWithSeparator(new Date(post.id * 1000))}
+              </div>
               {/* row 3 */}
               <div style={{ textAlign: 'left' }}>
                 <label style={{ fontWeight: 'bold' }}>交易日</label>
@@ -202,151 +178,6 @@ function HistoryList(props) {
           </div>
         );
       })}
-    </>
-  );
-}
-
-function PostList(props) {
-  const openNewPage = (path) => {
-    const url = `https://www.ptt.cc/${path}`;
-    window.open(url, '_blank');
-  };
-  const { data } = props;
-  const containTargetPosts = data.find((item) => item.tag === '標的');
-  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-  const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
-  return (
-    <>
-      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
-      <div style={{ marginBottom: '20px' }}></div>
-      {filteredData.map((post) => {
-        return (
-          <div
-            key={`${post.id}${post.batchNo}`}
-            style={{
-              maxWidth: '450px',
-              margin: '0 auto 20px',
-              padding: '20px',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '10px',
-              }}
-            >
-              <div
-                onClick={() => openNewPage(post.href)}
-                style={{
-                  gridColumn: '1 / span 2',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                }}
-              >
-                [{post.tag}] {post.title}
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                作者: <Link to={`/ptt/author/${post.author}`}>{post.author}</Link>
-              </div>
-              <div style={{ textAlign: 'left' }}>日期: {post.date}</div>
-            </div>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
-function AuthorList(props) {
-  const { data } = props;
-  const [searchText, setSearchText] = useState();
-  const navigate = useNavigate();
-  const handleSearchClick = () => {
-    if (searchText) {
-      navigate(`/ptt/author/${searchText}`);
-    }
-  };
-
-  return (
-    <>
-      <div
-        style={{
-          maxWidth: '450px',
-          margin: '0 auto 20px',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '8fr 2fr',
-            gap: '10px',
-            alignItems: 'center',
-            placeItems: 'center',
-          }}
-        >
-          <input
-            className='text-input'
-            type='text'
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            required={true}
-            placeholder={'Search author'}
-          />
-          <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
-            查詢
-          </button>
-        </div>
-      </div>
-      {data.map((item) => {
-        return (
-          <div
-            key={item.name}
-            style={{
-              maxWidth: '450px',
-              margin: '0 auto 20px',
-              padding: '20px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              position: 'relative',
-            }}
-          >
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.name}</span>
-            <span style={{ color: '#888', marginLeft: '10px', marginRight: '10px' }}>Likes: {item.likes}</span>
-            <Link to={`/ptt/author/${item.name}`}>Link</Link>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
-function formatDateToYYYYMMDD(timestamp) {
-  const date = new Date(timestamp * 1000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function toYYYYMMDDWithSeparator(input, separator = '-') {
-  if (typeof input == 'string') {
-    return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
-  } else {
-    return `${input.getFullYear().toString()}${separator}${('0' + (input.getMonth() + 1)).slice(-2)}${separator}${(
-      '0' + input.getDate()
-    ).slice(-2)}`;
-  }
-}
-
-function Empty(props) {
-  return (
-    <>
-      <label>無資料</label>
     </>
   );
 }
