@@ -175,13 +175,7 @@ function Tabs(props) {
       <div className='tabs'>
         {tagArray.map((tag) => (
           <React.Fragment key={tag}>
-            <input
-              type='radio'
-              id={`radio-${tag}`}
-              name='tabs'
-              checked={activeTag === tag}
-              onChange={() => onTabClick(tag)}
-            />
+            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onTabClick(tag)} />
             <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
               {tag}
             </label>
@@ -299,9 +293,7 @@ function HistoryList(props) {
                   <div>日期: {toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}</div>
                 </div>
               ) : (
-                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>
-                  {toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}
-                </div>
+                <div style={{ gridColumn: '1 / span 3', textAlign: 'left' }}>{toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}</div>
               )}
 
               {isMyList ? (
@@ -336,7 +328,7 @@ function HistoryList(props) {
                   </div>
                   {/* row 5 */}
                   <div style={{ textAlign: 'left' }}>
-                    <label style={{ fontWeight: 'bold' }}>最近一個交易日</label>
+                    <label style={{ fontWeight: 'bold' }}>最近交易日</label>
                     <div>{latest.date ? `${toYYYYMMDDWithSeparator(latest.date)}` : '-'}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -475,14 +467,7 @@ function AuthorList(props) {
             placeItems: 'center',
           }}
         >
-          <input
-            className='text-input'
-            type='text'
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            required={true}
-            placeholder={'Search author'}
-          />
+          <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
           <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
             查詢
           </button>
@@ -643,24 +628,12 @@ const styles = {
 
 const ArrowIcon = () => (
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24px' height='24px' fill='currentColor'>
-    <path
-      fillRule='evenodd'
-      d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z'
-      clipRule='evenodd'
-    />
+    <path fillRule='evenodd' d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z' clipRule='evenodd' />
   </svg>
 );
 
 const ThumbUpIcon = () => (
-  <svg
-    width='24px'
-    height='24px'
-    viewBox='0 0 1024.00 1024.00'
-    className='icon'
-    version='1.1'
-    xmlns='http://www.w3.org/2000/svg'
-    fill='#000000'
-  >
+  <svg width='24px' height='24px' viewBox='0 0 1024.00 1024.00' className='icon' version='1.1' xmlns='http://www.w3.org/2000/svg' fill='#000000'>
     <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
     <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
     <g id='SVGRepo_iconCarrier'>
@@ -681,15 +654,7 @@ const BackButton = () => (
       <title></title>
       <g id='Complete'>
         <g id='F-Chevron'>
-          <polyline
-            fill='none'
-            id='Left'
-            points='15.5 5 8.5 12 15.5 19'
-            stroke='#000000'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth='2'
-          ></polyline>
+          <polyline fill='none' id='Left' points='15.5 5 8.5 12 15.5 19' stroke='#000000' strokeLinecap='round' strokeLinejoin='round' strokeWidth='2'></polyline>
         </g>
       </g>
     </g>
