@@ -488,7 +488,7 @@ function Empty(props) {
   );
 }
 
-function TopNavTab(props) {
+export function TopNavTab(props) {
   const navigate = useNavigate();
   const [activeTag, setActiveTag] = useState(props.defaultTab);
   return (

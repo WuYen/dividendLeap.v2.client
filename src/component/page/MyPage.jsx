@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getLoginStatus } from './Login';
 import PageTitle from '../common/PageTitle';
 import TeaLoading from '../common/TeaLoading';
-import MyPttContainer from './MyPttContainer';
+import MyPttContainer from './MyPttContainer.v2';
 
 export default function MyPage() {
   const [isLoggedIn] = getLoginStatus();
