@@ -18,3 +18,8 @@ export const favoritesState = atom({
     authors: [],
   },
 });
+
+export const authorsPostsState = atom({
+  key: 'authorsPostsState',
+  default: [],
+});

@@ -1,29 +1,28 @@
-import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { useRecoilValue, RecoilRoot, useSetRecoilState } from 'recoil';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
 
 import api from '../../utility/api';
-import { postsState, authorsState, favoritesState } from '../../state/atoms';
+import { postsState, authorsState, favoritesState, authorsPostsState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
 import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
 import { MyPostList } from '../common/MyPostList';
-import { TopNavTab } from './MyPttContainer';
+import Tabs from '../common/Tabs';
+import TeaLoading from '../common/TeaLoading';
 
 export default function MyPttContainer() {
   return (
-    <div className='App'>
-      <RecoilRoot>
-        <DataLoader>
-          <Routes>
-            <Route path='/' element={<PostListPage />} />
-            <Route path='/posts' element={<MyPostListPage />} />
-            <Route path='/authors' element={<AuthorListPage />} />
-            <Route path='/author/:id' element={<HistoryListPage />} />
-          </Routes>
-        </DataLoader>
-      </RecoilRoot>
-    </div>
+    <RecoilRoot>
+      <DataLoader>
+        <Routes>
+          <Route path='/' element={<PostListPage />} />
+          <Route path='/posts' element={<MyPostListPage />} />
+          <Route path='/authors' element={<AuthorListPage />} />
+          <Route path='/author/:id' element={<HistoryListPage />} />
+        </Routes>
+      </DataLoader>
+    </RecoilRoot>
   );
 }
 
@@ -58,27 +57,96 @@ function AuthorListPage(props) {
 }
 
 function HistoryListPage(props) {
-  //TODO:add an atom of this page data, fetch data
-  //const authors = useRecoilValue(authorsState);
-  const headerStyles = {};
-  const handleBack = () => {};
-  const author = '';
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const [authorsPosts, setAuthorsPostsState] = useRecoilState(authorsPostsState);
+
+  useEffect(() => {
+    // Fetch data from API or data source
+    const fetchData = async () => {
+      const refresh = searchParams.get('refresh');
+      const url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+
+      const posts = await api.get(url);
+      setAuthorsPostsState(posts.data);
+    };
+
+    fetchData();
+  }, [id, searchParams, setAuthorsPostsState]);
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <>
-      <div style={headerStyles.container}>
-        <div style={headerStyles.arrowContainer} onClick={handleBack}>
-          back
+      <div
+        style={{
+          maxWidth: '450px',
+          margin: '0 auto 15px',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: '0',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            cursor: 'pointer',
+            display: 'flex',
+            borderRadius: '99px',
+            border: '1px solid #ccc',
+            padding: '4px 12px',
+          }}
+          onClick={handleBack}
+        >
+          Back
         </div>
-        <div style={headerStyles.text}>作者: {author} 貼文</div>
+        <div
+          style={{
+            fontSize: '20px',
+            textAlign: 'center',
+            paddingLeft: '24px',
+            paddingRight: '24px',
+          }}
+        >
+          作者: {id} 貼文
+        </div>
       </div>
       <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-      <HistoryList data={[]} />
+      <HistoryList data={authorsPosts} />
     </>
+  );
+}
+
+function TopNavTab(props) {
+  const navigate = useNavigate();
+  const [activeTag, setActiveTag] = useState(props.defaultTab);
+  return (
+    <div style={{ marginBottom: '10px' }}>
+      <Tabs
+        tagArray={['文章', 'My文章', '作者']}
+        activeTag={activeTag}
+        onTabClick={(tag) => {
+          setActiveTag(tag);
+          if (tag === '文章') {
+            navigate('/my');
+          } else if (tag === '作者') {
+            navigate('/my/authors');
+          } else if (tag === 'My文章') {
+            navigate('/my/posts');
+          }
+        }}
+      />
+    </div>
   );
 }
 
 const DataLoader = (props) => {
   //一口氣拉三個資料
+  const [loading, setLoading] = useState(true);
   const setPosts = useSetRecoilState(postsState);
   const setAuthors = useSetRecoilState(authorsState);
   const setFavoriteItems = useSetRecoilState(favoritesState);
@@ -86,15 +154,20 @@ const DataLoader = (props) => {
   useEffect(() => {
     // Fetch data from API or data source
     const fetchData = async () => {
-      const [posts, authors, myPosts] = await Promise.all([api.get('/my/posts'), api.get('/ptt/authors'), api.get('/my/posts/favorite')]);
-      debugger;
+      const [posts, authors, myPosts] = await Promise.all([
+        api.get('/my/posts'),
+        api.get('/ptt/authors'),
+        api.get('/my/posts/favorite'),
+      ]);
+
       setPosts(posts.data);
       setAuthors(authors.data);
       setFavoriteItems({ posts: myPosts.data });
+      setLoading(false);
     };
 
     fetchData();
-  }, [setPosts, setAuthors, setFavoriteItems]);
+  }, [setPosts, setAuthors, setFavoriteItems, setLoading]);
 
-  return props.children;
+  return loading ? <TeaLoading /> : props.children;
 };
