@@ -1,13 +1,13 @@
 export function getPureDate(str) {
-  return str.replace(/\D/g, "");
+  return str.replace(/\D/g, '');
 }
 
 export function formatDate(str) {
   if (!str) {
-    return "";
+    return '';
   }
   let dateStr = getPureDate(str);
-  return dateStr.substr(0, 4) + "-" + dateStr.substr(4, 2) + "-" + dateStr.substr(6, 2);
+  return dateStr.substr(0, 4) + '-' + dateStr.substr(4, 2) + '-' + dateStr.substr(6, 2);
 }
 
 export function tryParseFloat(value) {
@@ -21,7 +21,7 @@ export function toDateString(date) {
 }
 
 export function getDateFragment(date) {
-  if (typeof date == "string") {
+  if (typeof date == 'string') {
     return {
       year: date.substr(0, 4),
       month: date.substr(4, 2),
@@ -30,21 +30,25 @@ export function getDateFragment(date) {
   } else if (date && date.getFullYear) {
     return {
       year: date.getFullYear().toString(),
-      month: `${("0" + (date.getMonth() + 1)).slice(-2)}`,
-      day: `${("0" + date.getDate()).slice(-2)}`,
+      month: `${('0' + (date.getMonth() + 1)).slice(-2)}`,
+      day: `${('0' + date.getDate()).slice(-2)}`,
     };
   } else {
     return {
-      year: "",
-      month: "",
-      day: "",
+      year: '',
+      month: '',
+      day: '',
     };
   }
 }
 
-export default {
-  getPureDate,
-  formatDate,
-  tryParseFloat,
-  getDateFragment,
-};
+export function toYYYYMMDDWithSeparator(input, separator = '-') {
+  if (typeof input == 'string') {
+    return `${input.slice(0, 4)}${separator}${input.slice(4, 6)}${separator}${input.slice(6, 8)}`;
+  } else {
+    const year = input.getFullYear();
+    const month = String(input.getMonth() + 1).padStart(2, '0');
+    const day = String(input.getDate()).padStart(2, '0');
+    return `${year}${separator}${month}${separator}${day}`;
+  }
+}
