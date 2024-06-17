@@ -193,10 +193,21 @@ function MiniPost(props) {
         textAlign: 'left',
       }}
     >
-      <div onClick={() => openNewPage(post.href)}>
-        [{post.tag}] {post.title}👈
+      <div
+        style={{
+          textAlign: 'center', // Center text horizontally
+          cursor: 'pointer',
+          display: 'flex', // Use flexbox
+        }}
+      >
+        <FavoriteButton isFavorite={Boolean(post.isFavorite)} id={post.id} />
+        <div style={{ padding: '0px 4px' }}></div>
+        <div onClick={() => openNewPage(post.href)}>
+          [{post.tag}] {post.title}👈
+        </div>
       </div>
       <div style={{ display: 'inline-flex' }}>
+        <div style={{ padding: '0px 16px' }}></div>
         <div>{baseDateInfo.close.toFixed(2)}</div>
         <div style={{ padding: '0px 8px' }}>|</div>
         <div>{latest.price.toFixed(2)}</div>
