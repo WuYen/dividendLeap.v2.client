@@ -73,13 +73,18 @@ function HistoryListPage(props) {
     };
 
     fetchData();
+    return () => {
+      setAuthorsPostsState([]);
+    };
   }, [id, searchParams, setAuthorsPostsState]);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  return (
+  return authorsPosts.length === 0 ? (
+    <TeaLoading />
+  ) : (
     <>
       <div
         style={{
