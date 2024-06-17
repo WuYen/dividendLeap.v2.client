@@ -1,48 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { debounce } from '../../utility/debounce';
 
 export function AuthorList(props) {
   const { data } = props;
-  const [searchText, setSearchText] = useState();
+  const [filteredData, setFilteredData] = useState(data);
   const navigate = useNavigate();
-  const handleSearchClick = () => {
-    if (searchText) {
-      navigate(`/my/author/${searchText}`);
-    }
-  };
+
+  const handleFilterData = debounce((searchText) => {
+    const filtered = data.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
+    setFilteredData(filtered);
+  }, 400);
 
   return (
     <>
-      <div
-        style={{
-          maxWidth: '450px',
-          margin: '0 auto 20px',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '8fr 2fr',
-            gap: '10px',
-            alignItems: 'center',
-            placeItems: 'center',
-          }}
-        >
-          <input
-            className='text-input'
-            type='text'
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            required={true}
-            placeholder={'Search author'}
-          />
-          <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
-            查詢
-          </button>
-        </div>
-      </div>
-      {data.map((item) => (
+      <SearchBar onSearchTextChange={handleFilterData} />
+      {filteredData.map((item) => (
         <AuthorListItem key={item.name} authoInfo={item} navigate={navigate} />
       ))}
     </>
@@ -74,6 +47,46 @@ const AuthorListItem = (props) => {
       </div>
       <div style={styles.arrowContainer} onClick={(e) => handleArrowClick(e)}>
         <ArrowIcon />
+      </div>
+    </div>
+  );
+};
+
+const SearchBar = ({ onSearchTextChange }) => {
+  const navigate = useNavigate();
+  const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    onSearchTextChange(searchText);
+  }, [searchText, onSearchTextChange]);
+
+  const handleSearchClick = () => {
+    if (searchText) {
+      navigate(`/my/author/${searchText}`);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        maxWidth: '450px',
+        margin: '0 auto 20px',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '8fr 2fr',
+          gap: '10px',
+          alignItems: 'center',
+          placeItems: 'center',
+        }}
+      >
+        <input className='text-input' type='text' value={searchText} onChange={(e) => setSearchText(e.target.value)} required={true} placeholder={'Search author'} />
+        <button className='regis-button' style={{ width: '100%', maxWidth: '100%' }} onClick={handleSearchClick}>
+          查詢
+        </button>
       </div>
     </div>
   );
@@ -137,24 +150,12 @@ const styles = {
 
 const ArrowIcon = () => (
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24px' height='24px' fill='currentColor'>
-    <path
-      fillRule='evenodd'
-      d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z'
-      clipRule='evenodd'
-    />
+    <path fillRule='evenodd' d='M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z' clipRule='evenodd' />
   </svg>
 );
 
 const ThumbUpIcon = () => (
-  <svg
-    width='24px'
-    height='24px'
-    viewBox='0 0 1024.00 1024.00'
-    className='icon'
-    version='1.1'
-    xmlns='http://www.w3.org/2000/svg'
-    fill='#000000'
-  >
+  <svg width='24px' height='24px' viewBox='0 0 1024.00 1024.00' className='icon' version='1.1' xmlns='http://www.w3.org/2000/svg' fill='#000000'>
     <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
     <g id='SVGRepo_tracerCarrier' strokeLinecap='round' strokeLinejoin='round'></g>
     <g id='SVGRepo_iconCarrier'>
