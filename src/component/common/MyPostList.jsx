@@ -14,11 +14,31 @@ export function MyPostList(props) {
   };
   const containTargetPosts = data.find((item) => item.tag === '標的');
   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
+  const [useMini, setUseMini] = useState(true);
   const filteredData = activeTag === '全部' ? data : data.filter((item) => item.tag === activeTag);
 
   return (
     <>
-      <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+      <div style={{ position: 'relative', maxWidth: '450px', margin: 'auto' }}>
+        <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
+        <div
+          style={{
+            position: 'absolute',
+            top: '-1px',
+            right: '-1px',
+            backgroundColor: '#5bbcdb',
+            color: 'white',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+          }}
+          onClick={() => {
+            setUseMini((x) => !x);
+          }}
+        >
+          切換
+        </div>
+      </div>
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((postInfo) => {
         const { processedData, historicalInfo, isRecentPost } = postInfo;
@@ -26,7 +46,9 @@ export function MyPostList(props) {
         let hight = processedData.find((x) => x.type === 'highest');
         let latest = processedData.find((x) => x.type === 'latest');
 
-        return (
+        return useMini ? (
+          <MiniPost post={postInfo} openNewPage={openNewPage} />
+        ) : (
           <div
             key={`${postInfo.id}${postInfo.batchNo}`}
             style={{
@@ -150,5 +172,39 @@ export function MyPostList(props) {
         );
       })}
     </>
+  );
+}
+
+function MiniPost(props) {
+  const { post, openNewPage } = props;
+  const latest = post.processedData.find((x) => x.type === 'latest');
+  const baseDateInfo = post.historicalInfo[0];
+
+  return (
+    <div
+      key={`${post.id}${post.batchNo}`}
+      style={{
+        maxWidth: '450px',
+        margin: '0 auto 10px',
+        padding: '5px 10px',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        position: 'relative',
+        textAlign: 'left',
+      }}
+    >
+      <div onClick={() => openNewPage(post.href)}>
+        [{post.tag}] {post.title}👈
+      </div>
+      <div style={{ display: 'inline-flex' }}>
+        <div>{baseDateInfo.close.toFixed(2)}</div>
+        <div style={{ padding: '0px 8px' }}>|</div>
+        <div>{latest.price.toFixed(2)}</div>
+        <div style={{ padding: '0px 8px' }}></div>
+        <div>
+          {latest.diff} ({latest.diffPercent}%)
+        </div>
+      </div>
+    </div>
   );
 }
