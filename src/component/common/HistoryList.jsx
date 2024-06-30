@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import { FavoriteButton } from './FavoriteButton';
 import { PostTabs } from './Tabs';
+import StockChart from './StockChart';
 
 export function HistoryList(props) {
   const { data } = props;
@@ -103,6 +104,10 @@ export function HistoryList(props) {
                 <div>
                   {hight.diff} ({hight.diffPercent}%)
                 </div>
+              </div>
+              {/* row 3 */}
+              <div style={{ gridColumn: '1 / span 3' }}>
+                <StockChart rawData={historicalInfo} />
               </div>
             </div>
           </div>
