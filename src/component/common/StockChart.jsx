@@ -32,10 +32,19 @@ function StockChart({ rawData }) {
     },
     hAxis: {
       //title: "日期",
-      format: 'yyyy/MM',
-      gridlines: { color: 'transparent' },
+      format: 'MM/dd', // 只顯示年和月
+      //ticks: tickDates,
+      //gridlines: { color: 'transparent' },
+      gridlines: {
+        color: '#e0e0e0', // 設置網格線顏色
+        count: 3, // 確保只有3條網格線
+      },
       minorGridlines: { color: 'transparent' },
       baselineColor: 'transparent',
+      textPosition: 'in',
+      textStyle: {
+        fontSize: 12,
+      },
     },
     vAxis: {
       //title: "收盤價",
