@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-ro
 import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
 
 import api from '../../utility/api';
-import { postsState, authorsState, favoritesState, authorsPostsState } from '../../state/atoms';
+import { postsState, authorsState, favoritesState, authorsPostsState, authorsRankState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
 import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
@@ -159,49 +159,39 @@ const DataLoader = (props) => {
   const setPosts = useSetRecoilState(postsState);
   const setAuthors = useSetRecoilState(authorsState);
   const setFavoriteItems = useSetRecoilState(favoritesState);
+  const setAuthorsRank = useSetRecoilState(authorsRankState);
 
   useEffect(() => {
     // Fetch data from API or data source
     const fetchData = async () => {
-      const [posts, authors, myPosts] = await Promise.all([
+      const [posts, authors, myPosts, rank] = await Promise.all([
         api.get('/my/posts'),
         api.get('/ptt/authors'),
         api.get('/my/posts/favorite'),
+        api.get('/my/authors/rank'),
       ]);
 
       setPosts(posts.data);
       setAuthors(authors.data);
       setFavoriteItems({ posts: myPosts.data });
+      setAuthorsRank(rank.data);
       setLoading(false);
     };
 
     fetchData();
-  }, [setPosts, setAuthors, setFavoriteItems, setLoading]);
+  }, [setPosts, setAuthors, setFavoriteItems, setLoading, setAuthorsRank]);
 
   return loading ? <TeaLoading /> : props.children;
 };
 
 function AuthorRankPage(props) {
-  const [data, setData] = useState(null);
+  const authorsRank = useRecoilValue(authorsRankState);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await api.get(`/my/authors/rank`);
-      setData(response.data);
-    };
-
-    fetchData();
-    return () => {
-      setData([]);
-    };
-  }, [setData]);
-
-  return !data || data.length === 0 ? (
-    <TeaLoading />
-  ) : (
+  console.log('author', authorsRank);
+  return (
     <>
       <TopNavTab defaultTab='排名' />
-      <AuthorRankList data={data} />
+      <AuthorRankList data={authorsRank} />
     </>
   );
 }
