@@ -23,3 +23,8 @@ export const authorsPostsState = atom({
   key: 'authorsPostsState',
   default: [],
 });
+
+export const authorsRankState = atom({
+  key: 'authorsRankState',
+  default: [],
+});

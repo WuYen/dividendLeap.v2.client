@@ -5,6 +5,7 @@ import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 import { FavoriteButton } from './FavoriteButton';
 import { PostTabs } from './Tabs';
+// import StockCard from './StockCard';
 
 export function MyPostList(props) {
   const { data } = props;
@@ -39,15 +40,16 @@ export function MyPostList(props) {
           切換
         </div>
       </div>
+
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((postInfo) => {
         const { processedData, historicalInfo, isRecentPost } = postInfo;
         const baseDateInfo = historicalInfo && historicalInfo.length ? historicalInfo[0] : {};
-        let hight = processedData.find((x) => x.type === 'highest');
-        let latest = processedData.find((x) => x.type === 'latest');
+        const hight = processedData.find((x) => x.type === 'highest');
+        const latest = processedData.find((x) => x.type === 'latest');
 
         return useMini ? (
-          <MiniPost post={postInfo} openNewPage={openNewPage} />
+          <MiniPost post={postInfo} openNewPage={openNewPage} /> //<StockCard data={postInfo} />
         ) : (
           <div
             key={`${postInfo.id}${postInfo.batchNo}`}
@@ -123,50 +125,55 @@ export function MyPostList(props) {
                 </div>
                 <div>日期: {toYYYYMMDDWithSeparator(new Date(postInfo.id * 1000))}</div>
               </div>
-
-              {/* row 3 */}
-              <div style={{ textAlign: 'left' }}>
-                <label style={{ fontWeight: 'bold' }}>基準日</label>
-                <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>股價</label>
-                <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>差異</label>
-                <div>-</div>
-              </div>
-              {/* row 4 */}
-              <div style={{ textAlign: 'left' }}>
-                <label style={{ fontWeight: 'bold' }}>四個月內最高</label>
-                <div>{hight.date ? `${toYYYYMMDDWithSeparator(hight.date)}` : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>股價</label>
-                <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>差異</label>
-                <div>
-                  {hight.diff} ({hight.diffPercent}%)
-                </div>
-              </div>
-              {/* row 5 */}
-              <div style={{ textAlign: 'left' }}>
-                <label style={{ fontWeight: 'bold' }}>最近交易日</label>
-                <div>{latest.date ? `${toYYYYMMDDWithSeparator(latest.date)}` : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>股價</label>
-                <div>{latest.price ? latest.price.toFixed(2) : '-'}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ fontWeight: 'bold' }}>差異</label>
-                <div>
-                  {latest.diff} ({latest.diffPercent}%)
-                </div>
-              </div>
+              <>
+                {hight && latest && baseDateInfo && (
+                  <>
+                    {/* row 3 */}
+                    <div style={{ textAlign: 'left' }}>
+                      <label style={{ fontWeight: 'bold' }}>基準日</label>
+                      <div>{baseDateInfo.date ? toYYYYMMDDWithSeparator(baseDateInfo.date) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>股價</label>
+                      <div>{baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>差異</label>
+                      <div>-</div>
+                    </div>
+                    {/* row 4 */}
+                    <div style={{ textAlign: 'left' }}>
+                      <label style={{ fontWeight: 'bold' }}>四個月內最高</label>
+                      <div>{hight.date ? `${toYYYYMMDDWithSeparator(hight.date)}` : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>股價</label>
+                      <div>{hight.price ? hight.price.toFixed(2) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>差異</label>
+                      <div>
+                        {hight.diff} ({hight.diffPercent}%)
+                      </div>
+                    </div>
+                    {/* row 5 */}
+                    <div style={{ textAlign: 'left' }}>
+                      <label style={{ fontWeight: 'bold' }}>最近交易日</label>
+                      <div>{latest.date ? `${toYYYYMMDDWithSeparator(latest.date)}` : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>股價</label>
+                      <div>{latest.price ? latest.price.toFixed(2) : '-'}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ fontWeight: 'bold' }}>差異</label>
+                      <div>
+                        {latest.diff} ({latest.diffPercent}%)
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
             </div>
           </div>
         );
@@ -208,13 +215,11 @@ function MiniPost(props) {
       </div>
       <div style={{ display: 'inline-flex' }}>
         <div style={{ padding: '0px 16px' }}></div>
-        <div>{baseDateInfo.close.toFixed(2)}</div>
+        <div>{baseDateInfo && baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}</div>
         <div style={{ padding: '0px 8px' }}>|</div>
-        <div>{latest.price.toFixed(2)}</div>
+        <div>{latest ? latest.price.toFixed(2) : '-'}</div>
         <div style={{ padding: '0px 8px' }}></div>
-        <div>
-          {latest.diff} ({latest.diffPercent}%)
-        </div>
+        <div>{latest ? `${latest.diff} (${latest.diffPercent}%)` : ''}</div>
       </div>
     </div>
   );

@@ -3,13 +3,14 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-ro
 import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
 
 import api from '../../utility/api';
-import { postsState, authorsState, favoritesState, authorsPostsState } from '../../state/atoms';
+import { postsState, authorsState, favoritesState, authorsPostsState, authorsRankState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
 import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
 import { MyPostList } from '../common/MyPostList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
+import AuthorRankList from '../common/AuthorRankList';
 
 export default function MyPttContainer() {
   return (
@@ -19,6 +20,7 @@ export default function MyPttContainer() {
           <Route path='/' element={<PostListPage />} />
           <Route path='/posts' element={<MyPostListPage />} />
           <Route path='/authors' element={<AuthorListPage />} />
+          <Route path='/authors/rank' element={<AuthorRankPage />} />
           <Route path='/author/:id' element={<HistoryListPage />} />
         </Routes>
       </DataLoader>
@@ -132,7 +134,7 @@ function TopNavTab(props) {
   return (
     <div style={{ marginBottom: '10px' }}>
       <Tabs
-        tagArray={['文章', 'My文章', '作者']}
+        tagArray={['文章', 'My文章', '作者', '排名']}
         activeTag={activeTag}
         onTabClick={(tag) => {
           setActiveTag(tag);
@@ -142,6 +144,8 @@ function TopNavTab(props) {
             navigate('/my/authors');
           } else if (tag === 'My文章') {
             navigate('/my/posts');
+          } else if (tag === '排名') {
+            navigate('/my/authors/rank');
           }
         }}
       />
@@ -155,24 +159,39 @@ const DataLoader = (props) => {
   const setPosts = useSetRecoilState(postsState);
   const setAuthors = useSetRecoilState(authorsState);
   const setFavoriteItems = useSetRecoilState(favoritesState);
+  const setAuthorsRank = useSetRecoilState(authorsRankState);
 
   useEffect(() => {
     // Fetch data from API or data source
     const fetchData = async () => {
-      const [posts, authors, myPosts] = await Promise.all([
+      const [posts, authors, myPosts, rank] = await Promise.all([
         api.get('/my/posts'),
         api.get('/ptt/authors'),
         api.get('/my/posts/favorite'),
+        api.get('/my/authors/rank'),
       ]);
 
       setPosts(posts.data);
       setAuthors(authors.data);
       setFavoriteItems({ posts: myPosts.data });
+      setAuthorsRank(rank.data);
       setLoading(false);
     };
 
     fetchData();
-  }, [setPosts, setAuthors, setFavoriteItems, setLoading]);
+  }, [setPosts, setAuthors, setFavoriteItems, setLoading, setAuthorsRank]);
 
   return loading ? <TeaLoading /> : props.children;
 };
+
+function AuthorRankPage(props) {
+  const authorsRank = useRecoilValue(authorsRankState);
+
+  console.log('author', authorsRank);
+  return (
+    <>
+      <TopNavTab defaultTab='排名' />
+      <AuthorRankList data={authorsRank} />
+    </>
+  );
+}
