@@ -31,19 +31,9 @@ function App() {
       errorElement: <ServerError />,
     },
     {
-      path: '/ptt',
+      path: '/ptt/author/:id',
       element: <PttContainer />,
       errorElement: <ServerError />,
-      children: [
-        {
-          path: 'authors',
-          element: <PttContainer />,
-        },
-        {
-          path: 'author/:id',
-          element: <PttContainer />,
-        },
-      ],
     },
     {
       path: '/line/registration',
