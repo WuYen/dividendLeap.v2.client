@@ -10,6 +10,7 @@ import { AuthorList } from '../common/AuthorList';
 import { MyPostList } from '../common/MyPostList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
+import AuthorRankList from '../common/AuthorRankList';
 
 export default function MyPttContainer() {
   return (
@@ -19,6 +20,7 @@ export default function MyPttContainer() {
           <Route path='/' element={<PostListPage />} />
           <Route path='/posts' element={<MyPostListPage />} />
           <Route path='/authors' element={<AuthorListPage />} />
+          <Route path='/authors/rank' element={<AuthorRankPage />} />
           <Route path='/author/:id' element={<HistoryListPage />} />
         </Routes>
       </DataLoader>
@@ -132,7 +134,7 @@ function TopNavTab(props) {
   return (
     <div style={{ marginBottom: '10px' }}>
       <Tabs
-        tagArray={['文章', 'My文章', '作者']}
+        tagArray={['文章', 'My文章', '作者', '排名']}
         activeTag={activeTag}
         onTabClick={(tag) => {
           setActiveTag(tag);
@@ -142,6 +144,8 @@ function TopNavTab(props) {
             navigate('/my/authors');
           } else if (tag === 'My文章') {
             navigate('/my/posts');
+          } else if (tag === '排名') {
+            navigate('/my/authors/rank');
           }
         }}
       />
@@ -176,3 +180,28 @@ const DataLoader = (props) => {
 
   return loading ? <TeaLoading /> : props.children;
 };
+
+function AuthorRankPage(props) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await api.get(`/my/authors/rank`);
+      setData(response.data);
+    };
+
+    fetchData();
+    return () => {
+      setData([]);
+    };
+  }, [setData]);
+
+  return !data || data.length === 0 ? (
+    <TeaLoading />
+  ) : (
+    <>
+      <TopNavTab defaultTab='排名' />
+      <AuthorRankList data={data} />
+    </>
+  );
+}

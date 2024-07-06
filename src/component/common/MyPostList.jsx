@@ -5,6 +5,7 @@ import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 import { FavoriteButton } from './FavoriteButton';
 import { PostTabs } from './Tabs';
+// import StockCard from './StockCard';
 
 export function MyPostList(props) {
   const { data } = props;
@@ -39,6 +40,7 @@ export function MyPostList(props) {
           切換
         </div>
       </div>
+
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((postInfo) => {
         const { processedData, historicalInfo, isRecentPost } = postInfo;
@@ -47,7 +49,7 @@ export function MyPostList(props) {
         let latest = processedData.find((x) => x.type === 'latest');
 
         return useMini ? (
-          <MiniPost post={postInfo} openNewPage={openNewPage} />
+          <MiniPost post={postInfo} openNewPage={openNewPage} /> //<StockCard data={postInfo} />
         ) : (
           <div
             key={`${postInfo.id}${postInfo.batchNo}`}
