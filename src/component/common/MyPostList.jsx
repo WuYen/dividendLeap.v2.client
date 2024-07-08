@@ -4,10 +4,6 @@ import StockCard, { MiniStockCard } from './StockCard';
 
 export function MyPostList(props) {
   const { data } = props;
-  const openNewPage = (path) => {
-    const url = `https://www.ptt.cc/${path}`;
-    window.open(url, '_blank');
-  };
   const containTargetPosts = data.find((item) => item.tag === '標的');
   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
   const [useMini, setUseMini] = useState(true);
@@ -38,11 +34,7 @@ export function MyPostList(props) {
 
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((postInfo) => {
-        return useMini ? (
-          <MiniStockCard post={postInfo} openNewPage={openNewPage} onFavoriteToggle={() => {}} />
-        ) : (
-          <StockCard data={postInfo} />
-        );
+        return useMini ? <MiniStockCard post={postInfo} /> : <StockCard data={postInfo} />;
       })}
     </>
   );

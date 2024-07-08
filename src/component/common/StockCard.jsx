@@ -1,31 +1,27 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import { favoritesState } from '../../state/atoms';
 import { Card, CardContent, Typography, Box, Divider, Chip, IconButton } from '@mui/material';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import api from '../../utility/api';
 
+const openNewPage = (path) => {
+  const url = `https://www.ptt.cc/${path}`;
+  window.open(url, '_blank');
+};
+
 const StockCard = ({ data }) => {
   const { isRecentPost, processedData } = data;
-  const [isFavorite, setIsFavorite] = useState(data.isFavorite);
-
+  const [isFavorite, handleFavoriteClick] = useFavorite(data);
   const navigate = useNavigate();
+
   const handleAuthorClick = () => {
     navigate(`/my/author/${data.author}`);
   };
-  const handleBookMarkClick = async () => {
-    setIsFavorite(!isFavorite);
-    const response = await api.get(`/my/post/${data.id}/favorite`);
-    if (!response.success) {
-      setIsFavorite(!isFavorite);
-      alert('收藏失敗');
-    }
-  };
-  const openNewPage = (path) => {
-    const url = `https://www.ptt.cc/${path}`;
-    window.open(url, '_blank');
-  };
+
   return (
     <Card sx={{ maxWidth: 450, margin: '10px auto' }}>
       <CardContent
@@ -72,7 +68,7 @@ const StockCard = ({ data }) => {
               <IconButton
                 size='small'
                 aria-label='bookmark'
-                onClick={handleBookMarkClick}
+                onClick={handleFavoriteClick}
                 sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
               >
                 {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
@@ -169,13 +165,10 @@ const PriceColumn = ({ label, date, price, diff, diffPercent }) => (
 
 export default StockCard;
 
-export function MiniStockCard({ post, openNewPage, onFavoriteToggle }) {
-  const latest = post.processedData.find((x) => x.type === 'latest');
-  const baseDateInfo = post.historicalInfo[0];
-
-  const handleFavoriteClick = () => {
-    onFavoriteToggle(post.id, !post.isFavorite);
-  };
+export function MiniStockCard({ post }) {
+  const latest = post.processedData?.find((x) => x.type === 'latest') || null;
+  const baseDateInfo = post.historicalInfo?.[0] || null;
+  const [isFavorite, handleFavoriteClick] = useFavorite(post);
 
   return (
     <Card sx={{ maxWidth: 450, margin: '0 auto 10px', position: 'relative' }}>
@@ -198,22 +191,22 @@ export function MiniStockCard({ post, openNewPage, onFavoriteToggle }) {
             size='small'
             aria-label='bookmark'
             onClick={handleFavoriteClick}
-            sx={{ color: post.isFavorite ? 'primary.main' : 'inherit' }}
+            sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
           >
-            {post.isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
+            {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
           </IconButton>
         </Box>
         <Box display='flex' alignItems='center' ml={0}>
           <Typography variant='body2' color='text.secondary'>
-            {baseDateInfo && baseDateInfo.close ? baseDateInfo.close.toFixed(2) : '-'}
+            {baseDateInfo?.close ? baseDateInfo.close.toFixed(2) : '-'}
           </Typography>
           <Typography variant='body2' color='text.secondary' sx={{ mx: 1 }}>
             |
           </Typography>
           <Typography variant='body2' fontWeight='bold'>
-            {latest ? latest.price.toFixed(2) : '-'}
+            {latest?.price ? latest.price.toFixed(2) : '-'}
           </Typography>
-          {latest && (
+          {latest && latest.diff !== undefined && latest.diffPercent !== undefined && (
             <Typography variant='body2' color={latest.diff >= 0 ? 'success.main' : 'error.main'} sx={{ ml: 1 }}>
               {latest.diff} ({latest.diffPercent}%)
             </Typography>
@@ -222,4 +215,40 @@ export function MiniStockCard({ post, openNewPage, onFavoriteToggle }) {
       </CardContent>
     </Card>
   );
+}
+
+function useFavorite(post) {
+  const [favorites, setFavorites] = useRecoilState(favoritesState);
+
+  const isFavorite = favorites.posts.some((p) => p.id === post.id);
+
+  const toggleFavorite = useCallback(async () => {
+    const newFavoriteStatus = !isFavorite;
+
+    try {
+      const response = await api.get(`/my/post/${post.id}/favorite`);
+      if (response.success) {
+        setFavorites((prev) => {
+          if (newFavoriteStatus) {
+            return {
+              ...prev,
+              posts: [...prev.posts, post],
+            };
+          } else {
+            return {
+              ...prev,
+              posts: prev.posts.filter((p) => p.id !== post.id),
+            };
+          }
+        });
+      } else {
+        alert('收藏失敗');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('收藏失敗');
+    }
+  }, [isFavorite, post, setFavorites]);
+
+  return [isFavorite, toggleFavorite];
 }
