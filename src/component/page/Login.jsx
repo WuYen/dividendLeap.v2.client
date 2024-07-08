@@ -10,7 +10,7 @@ export const getLoginStatus = () => {
   if (!!token) {
     const decoded = jwtDecode(token);
     const currentTime = Math.floor(Date.now() / 1000);
-    const notExpire = decoded.exp < currentTime - 86400;
+    const notExpire = decoded.exp - 86400 < currentTime;
     console.log('exp:', decoded.exp, ', current:', currentTime);
     return [notExpire, decoded];
   } else {
