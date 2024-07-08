@@ -7,8 +7,15 @@ import PageTitle from '../common/PageTitle';
 
 export const getLoginStatus = () => {
   const token = localStorage.getItem('token');
-  const isLoggedIn = !!token;
-  return [isLoggedIn, isLoggedIn ? jwtDecode(token) : null]; // returns true if token exists, false otherwise
+  if (!!token) {
+    const decoded = jwtDecode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const isValid = decoded.exp - 86400 > currentTime;
+    console.log('exp:', decoded.exp, ', current:', currentTime, ', isValid:', isValid);
+    return [isValid, decoded];
+  } else {
+    return [false, null];
+  }
 };
 
 export default function LoginPage(props) {

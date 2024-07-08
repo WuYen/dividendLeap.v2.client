@@ -12,7 +12,7 @@ export function PostList(props) {
       <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((post) => {
-        return <StockCard data={{ ...post, isRecentPost: true }} />; //openNewPage={openNewPage}
+        return <StockCard key={`${post.id}${post.batchNo}`} data={{ ...post, isRecentPost: true }} />; //openNewPage={openNewPage}
       })}
     </>
   );
