@@ -4,6 +4,7 @@ import { Card, CardContent, Typography, List, ListItem, IconButton, Collapse, Bo
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 const AuthorCard = (props) => {
   const { author, maxRate, median, score, posts, likeCount, onLike } = props;
@@ -24,24 +25,18 @@ const AuthorCard = (props) => {
   };
 
   return (
-    <Card
-      sx={{
-        maxWidth: '450px',
-        margin: '0 auto 20px',
-        position: 'relative',
-      }}
-    >
-      <CardContent>
+    <Card sx={{ maxWidth: 450, margin: '10px auto' }}>
+      <CardContent sx={{ padding: '12px', '&:last-child': { paddingBottom: '12px' } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography
-            variant='h6'
+            variant='subtitle1'
             component='div'
             onClick={handleAuthorClick}
             sx={{
               cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
+              '&:hover': { textDecoration: 'underline' },
+              flexGrow: 1,
+              textAlign: 'left',
             }}
           >
             {author}
@@ -53,32 +48,64 @@ const AuthorCard = (props) => {
                   {likeCount}
                 </Typography>
                 <IconButton onClick={handleLikeClick} size='small'>
-                  <ThumbUpIcon />
+                  <ThumbUpIcon fontSize='small' />
                 </IconButton>
               </>
             )}
             {posts && posts.length > 0 && (
               <IconButton onClick={toggleExpand} size='small'>
-                {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {expanded ? <ExpandLessIcon fontSize='small' /> : <ExpandMoreIcon fontSize='small' />}
               </IconButton>
             )}
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <StatItem label='Median' value={median !== undefined ? median.toFixed(2) : '-'} />
-          <StatItem label='Max Rate' value={maxRate !== undefined ? maxRate.toFixed(2) : '-'} />
-          <StatItem label='score' value={score !== undefined ? score.toFixed(2) : '-'} />
+        <Box display='flex' bgcolor='grey.100' p={1} borderRadius={1} mt={1}>
+          <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
+            <StatItem label='Median' value={median !== undefined ? median.toFixed(2) : '-'} />
+            <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
+              |
+            </Typography>
+            <StatItem label='Max Rate' value={maxRate !== undefined ? maxRate.toFixed(2) : '-'} />
+            <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
+              |
+            </Typography>
+            <StatItem label='score' value={score !== undefined ? score.toFixed(2) : '-'} />
+          </Box>
         </Box>
       </CardContent>
       {posts && posts.length > 0 && (
         <Collapse in={expanded}>
-          <List dense>
+          <List dense sx={{ padding: '0px 0px 12px 0px' }}>
             {posts.map((post, index) => (
               <ListItem key={index}>
-                <Typography variant='body2'>
-                  {post.title.substring(0, 20)}... | {post.date} | Rate: {post.highest.diffPercent}%
-                </Typography>
+                <Box display='flex' alignItems='center' width='100%'>
+                  <Typography
+                    variant='body2'
+                    color='text.primary'
+                    sx={{
+                      flexGrow: 1,
+                      mr: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {post.title}
+                  </Typography>
+                  <Box width='70px' flexShrink={0} display='flex' justifyContent='flex-start'>
+                    <Typography variant='caption' color='text.secondary' sx={{ whiteSpace: 'nowrap' }}>
+                      {toYYYYMMDDWithSeparator(post.date, '-')}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant='caption'
+                    color={post.highest.diffPercent >= 0 ? 'error.main' : 'success.main'}
+                    sx={{ whiteSpace: 'nowrap', flexShrink: 0, width: '65px', textAlign: 'right' }}
+                  >
+                    {post.highest.diffPercent.toFixed(2)}%
+                  </Typography>
+                </Box>
               </ListItem>
             ))}
           </List>
@@ -89,7 +116,7 @@ const AuthorCard = (props) => {
 };
 
 const StatItem = ({ label, value }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+  <Box flex={1} display='flex' justifyContent='center' alignItems='center' flexDirection='column'>
     <Typography variant='caption' color='text.secondary'>
       {label}
     </Typography>

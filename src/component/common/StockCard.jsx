@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { favoritesState } from '../../state/atoms';
-import { Card, CardContent, Typography, Box, Divider, Chip, IconButton } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
@@ -13,115 +13,134 @@ const openNewPage = (path) => {
   window.open(url, '_blank');
 };
 
-const StockCard = ({ data }) => {
-  const { isRecentPost, processedData } = data;
-  const [isFavorite, handleFavoriteClick] = useFavorite(data);
+const StockCard = (props) => {
+  const { post, mini } = props;
+  const { isRecentPost, processedData } = post;
+  const [isFavorite, handleFavoriteClick] = useFavorite(post);
   const navigate = useNavigate();
 
   const handleAuthorClick = () => {
-    navigate(`/my/author/${data.author}`);
+    navigate(`/my/author/${post.author}`);
   };
 
   return (
     <Card sx={{ maxWidth: 450, margin: '10px auto' }}>
-      <CardContent
-        sx={{
-          padding: '12px',
-          '&:last-child': {
-            paddingBottom: '12px',
-          },
-        }}
-      >
-        <Box textAlign='left' mb={1}>
-          <Box display='flex' justifyContent='space-between' alignItems='center' mb={0}>
+      <CardContent sx={{ padding: '12px', '&:last-child': { paddingBottom: '12px' } }}>
+        <Box textAlign='left' mb={0}>
+          <Box display='flex' justifyContent='space-between' alignItems='start' mb={0}>
+            <Typography
+              variant='subtitle1'
+              component='div'
+              onClick={() => openNewPage(post.href)}
+              sx={{
+                cursor: 'pointer',
+                '&:hover': { textDecoration: 'underline' },
+                flexGrow: 1,
+                textAlign: 'left',
+              }}
+            >
+              [{post.tag}] {post.title}
+            </Typography>
+            <IconButton
+              size='small'
+              aria-label='bookmark'
+              onClick={handleFavoriteClick}
+              sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
+            >
+              {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
+            </IconButton>
+          </Box>
+          <Box display='flex' justifyContent='space-between' alignItems='center'>
+            <Typography
+              variant='subtitle2'
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+              component='div'
+              onClick={handleAuthorClick}
+              color='text.secondary'
+            >
+              {post.author}
+            </Typography>
             <Box display='flex' alignItems='center'>
-              <Typography
-                variant='subtitle2'
-                color='text.secondary'
-                sx={{
-                  mr: 1,
-                  lineHeight: 1, // 减小行高
-                  display: 'flex',
-                  alignItems: 'center',
-                  height: '20px', // 与Chip高度一致
-                  fontSize: '0.9rem',
-                }}
-              >
-                {toYYYYMMDDWithSeparator(new Date(data.id * 1000), '-')}
-              </Typography>
               {isRecentPost && (
                 <Chip
-                  label='新'
+                  label='NEW'
                   size='small'
                   sx={{
+                    mr: 1,
                     backgroundColor: 'lightblue',
                     color: 'white',
                     height: '20px',
                     fontSize: '0.7rem',
-                    fontWeight: 'normal', // 确保字体粗细一致
-                    lineHeight: '20px', // 确保文字垂直居中
+                    fontWeight: 'normal',
+                    lineHeight: '20px',
                   }}
                 />
               )}
-            </Box>
-            <Box>
-              <IconButton
-                size='small'
-                aria-label='bookmark'
-                onClick={handleFavoriteClick}
-                sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
+              <Typography
+                variant='subtitle2'
+                color='text.secondary'
+                sx={{
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '20px',
+                  fontSize: '0.9rem',
+                }}
               >
-                {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
-              </IconButton>
-              {/* 這裡可以添加更多功能按鈕 */}
+                {toYYYYMMDDWithSeparator(new Date(post.id * 1000), '-')}
+              </Typography>
             </Box>
           </Box>
-          <Typography
-            variant='h6'
-            component='div'
-            onClick={() => openNewPage(data.href)}
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          >
-            [{data.tag}] {data.stockNo} {data.title}
-          </Typography>
-          <Typography
-            variant='body2'
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-            component='div'
-            onClick={handleAuthorClick}
-            color='text.secondary'
-            gutterBottom
-          >
-            {data.author}
-          </Typography>
         </Box>
-        {processedData && processedData.length > 0 && (
-          <>
-            <Divider />
-            <StockCardBody processedData={processedData} />
-          </>
-        )}
+        {processedData && processedData.length > 0 && <StockCardBody processedData={processedData} mini={mini} />}
       </CardContent>
     </Card>
   );
 };
 
-const StockCardBody = ({ processedData }) => {
+const StockCardBody = ({ processedData, mini }) => {
   const baseDate = processedData.find((item) => item.type === 'base');
   const highestDate = processedData.find((item) => item.type === 'highest');
   const latestDate = processedData.find((item) => item.type === 'latest');
 
-  return (
+  return true ? (
+    <Box display='flex' bgcolor='grey.100' p={1} borderRadius={1} mt={1}>
+      <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
+        <Box flex={1} display='flex' justifyContent='center' alignItems='center'>
+          <Typography variant='body1' color='text.secondary'>
+            {baseDate?.price ? baseDate.price.toFixed(2) : '-'}
+          </Typography>
+        </Box>
+        <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
+          |
+        </Typography>
+        <Box flex={1} display='flex' justifyContent='center' alignItems='center'>
+          <Typography variant='body1' fontWeight='bold'>
+            {latestDate?.price ? latestDate.price.toFixed(2) : '-'}
+          </Typography>
+        </Box>
+        <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
+          |
+        </Typography>
+        <Box flex={1} display='flex' justifyContent='center' alignItems='center'>
+          {latestDate && latestDate.diff !== undefined && latestDate.diffPercent !== undefined ? (
+            <Typography variant='body1' color={latestDate.diff >= 0 ? 'error.main' : 'success.main'}>
+              {latestDate.diffPercent.toFixed(2)}%
+            </Typography>
+          ) : (
+            <Typography variant='body1' color='text.secondary'>
+              -
+            </Typography>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  ) : (
     <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
       <PriceColumn
         label='四個月內最高'
@@ -164,58 +183,6 @@ const PriceColumn = ({ label, date, price, diff, diffPercent }) => (
 );
 
 export default StockCard;
-
-export function MiniStockCard({ post }) {
-  const latest = post.processedData?.find((x) => x.type === 'latest') || null;
-  const baseDateInfo = post.historicalInfo?.[0] || null;
-  const [isFavorite, handleFavoriteClick] = useFavorite(post);
-
-  return (
-    <Card sx={{ maxWidth: 450, margin: '0 auto 10px', position: 'relative' }}>
-      <CardContent sx={{ padding: '8px 16px', '&:last-child': { paddingBottom: '8px' } }}>
-        <Box display='flex' alignItems='center' justifyContent='space-between' mb={0}>
-          <Typography
-            variant='subtitle1'
-            component='div'
-            onClick={() => openNewPage(post.href)}
-            sx={{
-              cursor: 'pointer',
-              '&:hover': { textDecoration: 'underline' },
-              flexGrow: 1,
-              textAlign: 'left',
-            }}
-          >
-            [{post.tag}] {post.title}
-          </Typography>
-          <IconButton
-            size='small'
-            aria-label='bookmark'
-            onClick={handleFavoriteClick}
-            sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
-          >
-            {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
-          </IconButton>
-        </Box>
-        <Box display='flex' alignItems='center' ml={0}>
-          <Typography variant='body2' color='text.secondary'>
-            {baseDateInfo?.close ? baseDateInfo.close.toFixed(2) : '-'}
-          </Typography>
-          <Typography variant='body2' color='text.secondary' sx={{ mx: 1 }}>
-            |
-          </Typography>
-          <Typography variant='body2' fontWeight='bold'>
-            {latest?.price ? latest.price.toFixed(2) : '-'}
-          </Typography>
-          {latest && latest.diff !== undefined && latest.diffPercent !== undefined && (
-            <Typography variant='body2' color={latest.diff >= 0 ? 'success.main' : 'error.main'} sx={{ ml: 1 }}>
-              {latest.diff} ({latest.diffPercent}%)
-            </Typography>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
-  );
-}
 
 function useFavorite(post) {
   const [favorites, setFavorites] = useRecoilState(favoritesState);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PostTabs } from './Tabs';
-import StockCard, { MiniStockCard } from './StockCard';
+import StockCard from './StockCard';
 
 export function PostList(props) {
   const { data, showSwitch = false } = props;
@@ -13,7 +13,7 @@ export function PostList(props) {
     <>
       <div style={{ position: 'relative', maxWidth: '450px', margin: 'auto' }}>
         <PostTabs containTargetPosts={containTargetPosts} activeTag={activeTag} onSetActiveTag={setActiveTag} />
-        {showSwitch && (
+        {false && (
           <div
             style={{
               position: 'absolute',
@@ -35,7 +35,7 @@ export function PostList(props) {
       </div>
       <div style={{ marginBottom: '20px' }}></div>
       {filteredData.map((postInfo) => {
-        return useMini ? <MiniStockCard post={postInfo} /> : <StockCard data={postInfo} />;
+        return <StockCard post={postInfo} mini={useMini} />;
       })}
     </>
   );
