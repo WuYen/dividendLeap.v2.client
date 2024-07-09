@@ -7,10 +7,8 @@ import { postsState, authorsState, favoritesState, authorPostsState, authorsRank
 import { PostList } from '../common/PostList';
 import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
-import { MyPostList } from '../common/MyPostList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
-import AuthorRankList from '../common/AuthorRankList';
 
 export default function MyPttContainer() {
   return (
@@ -46,7 +44,7 @@ function MyPostListPage(props) {
   ) : (
     <>
       <TopNavTab defaultTab='My文章' />
-      <MyPostList data={favorite.posts} />
+      <PostList data={favorites.posts} showSwitch={true} />
     </>
   );
 }
@@ -66,7 +64,7 @@ function AuthorRankPage(props) {
   return (
     <>
       <TopNavTab defaultTab='排名' />
-      <AuthorRankList data={authorsRank} />
+      <AuthorList data={authorsRank} />
     </>
   );
 }
