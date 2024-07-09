@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-ro
 import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
 
 import api from '../../utility/api';
-import { postsState, authorsState, favoritesState, authorsPostsState, authorsRankState } from '../../state/atoms';
+import { postsState, authorsState, favoritesState, authorPostsState, authorsRankState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
 import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
@@ -39,8 +39,11 @@ function PostListPage(props) {
 }
 
 function MyPostListPage(props) {
-  const favorite = useRecoilValue(favoritesState);
-  return (
+  const favorites = useRecoilValue(favoritesState);
+
+  return favorites.loading ? (
+    <TeaLoading />
+  ) : (
     <>
       <TopNavTab defaultTab='My文章' />
       <MyPostList data={favorite.posts} />
@@ -58,11 +61,21 @@ function AuthorListPage(props) {
   );
 }
 
+function AuthorRankPage(props) {
+  const authorsRank = useRecoilValue(authorsRankState);
+  return (
+    <>
+      <TopNavTab defaultTab='排名' />
+      <AuthorRankList data={authorsRank} />
+    </>
+  );
+}
+
 function HistoryListPage(props) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const [authorsPosts, setAuthorsPostsState] = useRecoilState(authorsPostsState);
+  const [authorPosts, setAuthorPostsState] = useRecoilState(authorPostsState);
 
   useEffect(() => {
     // Fetch data from API or data source
@@ -71,20 +84,20 @@ function HistoryListPage(props) {
       const url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
 
       const posts = await api.get(url);
-      setAuthorsPostsState(posts.data);
+      setAuthorPostsState(posts.data);
     };
 
     fetchData();
     return () => {
-      setAuthorsPostsState([]);
+      setAuthorPostsState([]);
     };
-  }, [id, searchParams, setAuthorsPostsState]);
+  }, [id, searchParams, setAuthorPostsState]);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  return authorsPosts.length === 0 ? (
+  return authorPosts.length === 0 ? (
     <TeaLoading />
   ) : (
     <>
@@ -123,7 +136,7 @@ function HistoryListPage(props) {
         </div>
       </div>
       <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-      <HistoryList data={authorsPosts} />
+      <HistoryList data={authorPosts} />
     </>
   );
 }
@@ -154,44 +167,41 @@ function TopNavTab(props) {
 }
 
 const DataLoader = (props) => {
-  //一口氣拉三個資料
   const [loading, setLoading] = useState(true);
   const setPosts = useSetRecoilState(postsState);
   const setAuthors = useSetRecoilState(authorsState);
-  const setFavoriteItems = useSetRecoilState(favoritesState);
+  const setFavorites = useSetRecoilState(favoritesState);
   const setAuthorsRank = useSetRecoilState(authorsRankState);
 
   useEffect(() => {
     // Fetch data from API or data source
     const fetchData = async () => {
-      const [posts, authors, myPosts, rank] = await Promise.all([
-        api.get('/my/posts'),
-        api.get('/ptt/authors'),
-        api.get('/my/posts/favorite'),
-        api.get('/my/authors/rank'),
-      ]);
+      const [posts, authors, rank] = await Promise.all([api.get('/my/posts'), api.get('/ptt/authors'), api.get('/my/authors/rank')]);
 
       setPosts(posts.data);
       setAuthors(authors.data);
-      setFavoriteItems({ posts: myPosts.data });
       setAuthorsRank(rank.data);
       setLoading(false);
     };
 
     fetchData();
-  }, [setPosts, setAuthors, setFavoriteItems, setLoading, setAuthorsRank]);
+
+    // 單獨處理慢速請求
+    setFavorites((prev) => ({ ...prev, loading: true }));
+    api
+      .get('/my/posts/favorite')
+      .then((myPosts) => {
+        setFavorites((prev) => ({
+          ...prev,
+          posts: myPosts.data,
+          loading: false,
+        }));
+      })
+      .catch((error) => {
+        console.error('Error fetching favorite posts:', error);
+        setFavorites((prev) => ({ ...prev, loading: false }));
+      });
+  }, [setPosts, setAuthors, setFavorites, setLoading, setAuthorsRank]);
 
   return loading ? <TeaLoading /> : props.children;
 };
-
-function AuthorRankPage(props) {
-  const authorsRank = useRecoilValue(authorsRankState);
-
-  console.log('author', authorsRank);
-  return (
-    <>
-      <TopNavTab defaultTab='排名' />
-      <AuthorRankList data={authorsRank} />
-    </>
-  );
-}

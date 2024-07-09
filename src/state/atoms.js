@@ -16,11 +16,12 @@ export const favoritesState = atom({
   default: {
     posts: [],
     authors: [],
+    loading: true,
   },
 });
 
-export const authorsPostsState = atom({
-  key: 'authorsPostsState',
+export const authorPostsState = atom({
+  key: 'authorPostsState',
   default: [],
 });
 
