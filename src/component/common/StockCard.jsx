@@ -7,6 +7,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import api from '../../utility/api';
+import StockChart from './StockChart';
 
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
@@ -15,7 +16,7 @@ const openNewPage = (path) => {
 
 const StockCard = (props) => {
   const { post, mini } = props;
-  const { isRecentPost, processedData } = post;
+  const { isRecentPost, processedData, historicalInfo } = post;
   const [isFavorite, handleFavoriteClick] = useFavorite(post);
   const navigate = useNavigate();
 
@@ -41,12 +42,7 @@ const StockCard = (props) => {
             >
               [{post.tag}] {post.title}
             </Typography>
-            <IconButton
-              size='small'
-              aria-label='bookmark'
-              onClick={handleFavoriteClick}
-              sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}
-            >
+            <IconButton size='small' aria-label='bookmark' onClick={handleFavoriteClick} sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}>
               {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
             </IconButton>
           </Box>
@@ -97,18 +93,18 @@ const StockCard = (props) => {
             </Box>
           </Box>
         </Box>
-        {processedData && processedData.length > 0 && <StockCardBody processedData={processedData} mini={mini} />}
+        {processedData && processedData.length > 0 && <StockCardBody processedData={processedData} historicalInfo={historicalInfo} mini={mini} />}
       </CardContent>
     </Card>
   );
 };
 
-const StockCardBody = ({ processedData, mini }) => {
+const StockCardBody = ({ historicalInfo, processedData, mini }) => {
   const baseDate = processedData.find((item) => item.type === 'base');
   const highestDate = processedData.find((item) => item.type === 'highest');
   const latestDate = processedData.find((item) => item.type === 'latest');
 
-  return true ? (
+  return mini ? (
     <Box display='flex' bgcolor='grey.100' p={1} borderRadius={1} mt={1}>
       <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
         <Box flex={1} display='flex' justifyContent='center' alignItems='center'>
@@ -141,22 +137,19 @@ const StockCardBody = ({ processedData, mini }) => {
       </Box>
     </Box>
   ) : (
-    <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
-      <PriceColumn
-        label='四個月內最高'
-        date={highestDate.date}
-        price={highestDate.price}
-        diff={highestDate.diff}
-        diffPercent={highestDate.diffPercent}
-      />
-      <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
-      <PriceColumn
-        label='最近交易日'
-        date={latestDate.date}
-        price={latestDate.price}
-        diff={latestDate.diff}
-        diffPercent={latestDate.diffPercent}
-      />
+    <Box>
+      <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
+        <PriceColumn
+          label='四個月內最高'
+          date={highestDate.date}
+          price={highestDate.price}
+          diff={highestDate.diff}
+          diffPercent={highestDate.diffPercent}
+        />
+        <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
+        <PriceColumn label='最近交易日' date={latestDate.date} price={latestDate.price} diff={latestDate.diff} diffPercent={latestDate.diffPercent} />
+      </Box>
+      <StockChart rawData={historicalInfo} />
     </Box>
   );
 };

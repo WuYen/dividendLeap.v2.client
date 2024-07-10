@@ -5,7 +5,6 @@ import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'r
 import api from '../../utility/api';
 import { postsState, authorsState, favoritesState, authorPostsState, authorsRankState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
-import { HistoryList } from '../common/HistoryList';
 import { AuthorList } from '../common/AuthorList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
@@ -19,7 +18,7 @@ export default function MyPttContainer() {
           <Route path='/posts' element={<MyPostListPage />} />
           <Route path='/authors' element={<AuthorListPage />} />
           <Route path='/authors/rank' element={<AuthorRankPage />} />
-          <Route path='/author/:id' element={<HistoryListPage />} />
+          <Route path='/author/:id' element={<AuthorPostsPage />} />
         </Routes>
       </DataLoader>
     </RecoilRoot>
@@ -69,7 +68,7 @@ function AuthorRankPage(props) {
   );
 }
 
-function HistoryListPage(props) {
+function AuthorPostsPage(props) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -134,7 +133,7 @@ function HistoryListPage(props) {
         </div>
       </div>
       <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
-      <HistoryList data={authorPosts} />
+      <PostList data={authorPosts} />
     </>
   );
 }
