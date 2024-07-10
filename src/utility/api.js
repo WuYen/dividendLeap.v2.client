@@ -1,5 +1,5 @@
 const isDev = process.env.NODE_ENV === 'development';
-const dataAPI = false ? 'http://localhost:8000' : 'https://monneey-fe846abf0722.herokuapp.com';
+const dataAPI = isDev ? 'http://localhost:8000' : 'https://monneey-fe846abf0722.herokuapp.com';
 
 //TODO: try to handle token expire
 
