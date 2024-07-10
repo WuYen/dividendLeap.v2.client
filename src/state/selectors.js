@@ -13,14 +13,14 @@ export const filteredPostsState = selector({
   },
 });
 
-export const filteredAuthorsState = selector({
-  key: 'filteredAuthorsState',
-  get: ({ get }) => {
-    const authors = get(authorsState);
-    const favorites = get(favoritesState).authors;
-    return authors.map((author) => ({
-      ...author,
-      isFavorite: favorites.includes(author.id),
-    }));
-  },
-});
+// export const filteredAuthorsState = selector({
+//   key: 'filteredAuthorsState',
+//   get: ({ get }) => {
+//     const authors = get(authorsState);
+//     const favorites = get(favoritesState).authors;
+//     return authors.map((author) => ({
+//       ...author,
+//       isFavorite: favorites.includes(author.id),
+//     }));
+//   },
+// });

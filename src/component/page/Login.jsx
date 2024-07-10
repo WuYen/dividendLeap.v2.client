@@ -6,6 +6,7 @@ import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
 
 export const getLoginStatus = () => {
+  //TODO: move user state to recoil
   const token = localStorage.getItem('token');
   if (!!token) {
     const decoded = jwtDecode(token);
@@ -61,14 +62,7 @@ export function InputAccountAndVerifyCode(props) {
       {!isCodeSent ? (
         <div>
           <div style={{ marginBottom: '20px' }}>📢 說明: 輸入註冊Notify時輸入的名稱</div>
-          <input
-            className='regis-input'
-            type='text'
-            value={channel}
-            onChange={(e) => setChannel(e.target.value)}
-            required
-            placeholder='輸入註冊名字'
-          />
+          <input className='regis-input' type='text' value={channel} onChange={(e) => setChannel(e.target.value)} required placeholder='輸入註冊名字' />
           <div className='regis-item-gap-20' />
           <button className='regis-button' onClick={handleSendVerifyCode}>
             獲取驗證碼
@@ -77,14 +71,7 @@ export function InputAccountAndVerifyCode(props) {
       ) : (
         <div>
           <div style={{ marginBottom: '20px' }}>📢 說明: 輸入Line收到的驗證碼</div>
-          <input
-            className='regis-input'
-            type='text'
-            value={verifyCode}
-            onChange={(e) => setVerifyCode(e.target.value)}
-            required
-            placeholder='輸入驗證碼'
-          />
+          <input className='regis-input' type='text' value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} required placeholder='輸入驗證碼' />
 
           <div className='regis-item-gap-20' />
           <button className='regis-button' onClick={handleVerifyCode}>
