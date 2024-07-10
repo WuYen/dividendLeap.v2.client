@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-ro
 import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
 
 import api from '../../utility/api';
-import { postsState, authorsState, favoritesState, authorPostsState, authorsRankState } from '../../state/atoms';
+import { postsState, favoritesState, authorPostsState, authorsRankState } from '../../state/atoms';
 import { PostList } from '../common/PostList';
 import { AuthorList } from '../common/AuthorList';
 import Tabs from '../common/Tabs';
@@ -16,7 +16,6 @@ export default function MyPttContainer() {
         <Routes>
           <Route path='/' element={<PostListPage />} />
           <Route path='/posts' element={<MyPostListPage />} />
-          <Route path='/authors' element={<AuthorListPage />} />
           <Route path='/authors/rank' element={<AuthorRankPage />} />
           <Route path='/author/:id' element={<AuthorPostsPage />} />
         </Routes>
@@ -48,21 +47,11 @@ function MyPostListPage(props) {
   );
 }
 
-function AuthorListPage(props) {
-  const authors = useRecoilValue(authorsState);
-  return (
-    <>
-      <TopNavTab defaultTab='作者' />
-      <AuthorList data={authors} />
-    </>
-  );
-}
-
 function AuthorRankPage(props) {
   const authorsRank = useRecoilValue(authorsRankState);
   return (
     <>
-      <TopNavTab defaultTab='排名' />
+      <TopNavTab defaultTab='作者' />
       <AuthorList data={authorsRank} />
     </>
   );
@@ -144,18 +133,16 @@ function TopNavTab(props) {
   return (
     <div style={{ marginBottom: '10px' }}>
       <Tabs
-        tagArray={['文章', 'My文章', '作者', '排名']}
+        tagArray={['文章', 'My文章', '作者']}
         activeTag={activeTag}
         onTabClick={(tag) => {
           setActiveTag(tag);
           if (tag === '文章') {
             navigate('/my');
           } else if (tag === '作者') {
-            navigate('/my/authors');
+            navigate('/my/authors/rank');
           } else if (tag === 'My文章') {
             navigate('/my/posts');
-          } else if (tag === '排名') {
-            navigate('/my/authors/rank');
           }
         }}
       />
@@ -166,17 +153,15 @@ function TopNavTab(props) {
 const DataLoader = (props) => {
   const [loading, setLoading] = useState(true);
   const setPosts = useSetRecoilState(postsState);
-  const setAuthors = useSetRecoilState(authorsState);
   const setFavorites = useSetRecoilState(favoritesState);
   const setAuthorsRank = useSetRecoilState(authorsRankState);
 
   useEffect(() => {
     // Fetch data from API or data source
     const fetchData = async () => {
-      const [posts, authors, rank] = await Promise.all([api.get('/my/posts'), api.get('/ptt/authors'), api.get('/my/authors/rank')]);
+      const [posts, rank] = await Promise.all([api.get('/my/posts'), api.get('/my/authors/rank')]);
 
       setPosts(posts.data);
-      setAuthors(authors.data);
       setAuthorsRank(rank.data);
       setLoading(false);
     };
@@ -198,7 +183,7 @@ const DataLoader = (props) => {
         console.error('Error fetching favorite posts:', error);
         setFavorites((prev) => ({ ...prev, loading: false }));
       });
-  }, [setPosts, setAuthors, setFavorites, setLoading, setAuthorsRank]);
+  }, [setPosts, setFavorites, setLoading, setAuthorsRank]);
 
   return loading ? <TeaLoading /> : props.children;
 };

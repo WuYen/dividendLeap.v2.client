@@ -6,11 +6,6 @@ export const postsState = atom({
   default: [],
 });
 
-export const authorsState = atom({
-  key: 'authorsState',
-  default: [],
-});
-
 export const favoritesState = atom({
   key: 'favoritesState',
   default: {

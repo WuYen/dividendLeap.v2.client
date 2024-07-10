@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, Typography, List, ListItem, IconButton, Collapse, Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+//import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 const AuthorCard = (props) => {
-  const { author, maxRate, median, score, posts, likeCount, onLike } = props;
+  const { author, maxRate, median, score, posts } = props;
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
@@ -19,10 +19,10 @@ const AuthorCard = (props) => {
     navigate(`/my/author/${author}`);
   };
 
-  const handleLikeClick = (e) => {
-    e.stopPropagation();
-    onLike(author);
-  };
+  // const handleLikeClick = (e) => {
+  //   e.stopPropagation();
+  //   onLike(author);
+  // };
 
   return (
     <Card sx={{ maxWidth: 450, margin: '10px auto' }}>
@@ -42,7 +42,7 @@ const AuthorCard = (props) => {
             {author}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {likeCount !== undefined && (
+            {/* {likeCount !== undefined && (
               <>
                 <Typography variant='body2' sx={{ mr: 1 }}>
                   {likeCount}
@@ -51,7 +51,7 @@ const AuthorCard = (props) => {
                   <ThumbUpIcon fontSize='small' />
                 </IconButton>
               </>
-            )}
+            )} */}
             {posts && posts.length > 0 && (
               <IconButton onClick={toggleExpand} size='small'>
                 {expanded ? <ExpandLessIcon fontSize='small' /> : <ExpandMoreIcon fontSize='small' />}
@@ -62,15 +62,15 @@ const AuthorCard = (props) => {
 
         <Box display='flex' bgcolor='grey.100' p={1} borderRadius={1} mt={1}>
           <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
-            <StatItem label='Median' value={median !== undefined ? median.toFixed(2) : '-'} />
+            <StatItem label='Median' value={median !== undefined && median !== 0 ? median.toFixed(2) : '-'} />
             <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
               |
             </Typography>
-            <StatItem label='Max Rate' value={maxRate !== undefined ? maxRate.toFixed(2) : '-'} />
+            <StatItem label='Max Rate' value={maxRate !== undefined && maxRate !== 0 ? maxRate.toFixed(2) : '-'} />
             <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>
               |
             </Typography>
-            <StatItem label='score' value={score !== undefined ? score.toFixed(2) : '-'} />
+            <StatItem label='score' value={score !== undefined && score !== 0 ? score.toFixed(2) : '-'} />
           </Box>
         </Box>
       </CardContent>
