@@ -42,7 +42,7 @@ function MyPostListPage(props) {
   ) : (
     <>
       <TopNavTab defaultTab='My文章' />
-      <PostList data={favorites.posts} showSwitch={true} />
+      <PostList data={favorites.posts} mini={true} />
     </>
   );
 }

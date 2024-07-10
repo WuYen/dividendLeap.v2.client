@@ -7,7 +7,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import api from '../../utility/api';
-import StockChart from './StockChart';
+// import StockChart from './StockChart';
 
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
@@ -149,7 +149,7 @@ const StockCardBody = ({ historicalInfo, processedData, mini }) => {
         <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
         <PriceColumn label='最近交易日' date={latestDate.date} price={latestDate.price} diff={latestDate.diff} diffPercent={latestDate.diffPercent} />
       </Box>
-      <StockChart rawData={historicalInfo} />
+      {/* <StockChart rawData={historicalInfo} /> */}
     </Box>
   );
 };
