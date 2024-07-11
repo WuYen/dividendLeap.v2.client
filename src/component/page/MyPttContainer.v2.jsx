@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
+import { Box, Typography, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import api from '../../utility/api';
 import { postsState, favoritesState, authorPostsState, authorsRankState } from '../../state/atoms';
@@ -42,7 +44,7 @@ function MyPostListPage(props) {
   ) : (
     <>
       <TopNavTab defaultTab='My文章' />
-      <PostList data={favorites.posts} mini={true} />
+      <PostList data={favorites.posts} mini={true} tagFilter={false} />
     </>
   );
 }
@@ -87,41 +89,41 @@ function AuthorPostsPage(props) {
     <TeaLoading />
   ) : (
     <>
-      <div
-        style={{
+      <Box
+        sx={{
           maxWidth: '450px',
           margin: '0 auto 15px',
           position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            left: '0',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            cursor: 'pointer',
-            display: 'flex',
-            borderRadius: '99px',
-            border: '1px solid #ccc',
-            padding: '4px 12px',
-          }}
+        <IconButton
           onClick={handleBack}
+          sx={{
+            position: 'absolute',
+            left: 0,
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+          size='small'
         >
-          Back
-        </div>
-        <div
-          style={{
-            fontSize: '20px',
+          <ArrowBackIcon fontSize='small' />
+        </IconButton>
+        <Typography
+          variant='h6'
+          sx={{
             textAlign: 'center',
-            paddingLeft: '24px',
-            paddingRight: '24px',
+            px: 3,
           }}
         >
           作者: {id} 貼文
-        </div>
-      </div>
-      <div style={{ marginBottom: '10px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
+        </Typography>
+      </Box>
       <PostList data={authorPosts} />
     </>
   );
