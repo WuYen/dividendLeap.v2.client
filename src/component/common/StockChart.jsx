@@ -2,15 +2,14 @@ import React from 'react';
 import { Chart } from 'react-google-charts';
 
 function StockChart({ rawData }) {
-  if (rawData.length < 20) {
-    return null;
-  }
-
   // 處理數據並找出最高點和最低點
   const processedData = rawData.map((item) => {
     const date = new Date(item.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
     return [date, item.close];
   });
+
+  // 排序數據以確保日期順序
+  processedData.sort((a, b) => a[0] - b[0]);
 
   // 找出最高點和最低點
   const [maxPoint, minPoint] = processedData.reduce(
@@ -31,13 +30,10 @@ function StockChart({ rawData }) {
       height: '100%',
     },
     hAxis: {
-      //title: "日期",
       format: 'MM/dd', // 只顯示年和月
-      //ticks: tickDates,
-      //gridlines: { color: 'transparent' },
       gridlines: {
         color: '#e0e0e0', // 設置網格線顏色
-        count: 3, // 確保只有3條網格線
+        count: processedData.length % 4,
       },
       minorGridlines: { color: 'transparent' },
       baselineColor: 'transparent',
@@ -47,11 +43,14 @@ function StockChart({ rawData }) {
       },
     },
     vAxis: {
-      //title: "收盤價",
       textPosition: 'none',
       gridlines: { color: 'transparent' },
       minorGridlines: { color: 'transparent' },
       baselineColor: 'transparent',
+      viewWindow: {
+        min: minPoint[1] - minPoint[1] * 0.3,
+        max: maxPoint[1] + maxPoint[1] * 0.1,
+      },
     },
     backgroundColor: {
       fill: 'white',
@@ -59,11 +58,13 @@ function StockChart({ rawData }) {
     annotations: {
       stem: {
         color: 'transparent',
+        length: 25, // 調整這個值來改變 annotation 與數據點的距離
       },
       textStyle: {
         fontSize: 12,
         bold: true,
       },
+      alwaysOutside: true,
     },
   };
 

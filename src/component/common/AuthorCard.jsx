@@ -60,7 +60,7 @@ const AuthorCard = (props) => {
           </Box>
         </Box>
 
-        <Box display='flex' bgcolor='grey.100' p={1} borderRadius={1} mt={1}>
+        <Box display='flex' bgcolor='grey.100' p={'4px'} borderRadius={1} mt={1}>
           <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
             <StatItem label='Median' value={median !== undefined && median !== 0 ? median.toFixed(2) : '-'} />
             <Typography variant='body1' color='text.secondary' sx={{ mx: 1 }}>

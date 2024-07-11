@@ -1,13 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { favoritesState } from '../../state/atoms';
-import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, IconButton, Collapse } from '@mui/material';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import api from '../../utility/api';
-// import StockChart from './StockChart';
+import StockChart from './StockChart';
 
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
@@ -18,10 +20,15 @@ const StockCard = (props) => {
   const { post, mini } = props;
   const { isRecentPost, processedData, historicalInfo } = post;
   const [isFavorite, handleFavoriteClick] = useFavorite(post);
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
   const handleAuthorClick = () => {
     navigate(`/my/author/${post.author}`);
+  };
+
+  const toggleExpand = () => {
+    setExpanded(!expanded);
   };
 
   return (
@@ -45,6 +52,11 @@ const StockCard = (props) => {
             <IconButton size='small' aria-label='bookmark' onClick={handleFavoriteClick} sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}>
               {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
             </IconButton>
+            {processedData && processedData.length > 0 && !mini && (
+              <IconButton onClick={toggleExpand} size='small'>
+                {expanded ? <ExpandLessIcon fontSize='small' /> : <ExpandMoreIcon fontSize='small' />}
+              </IconButton>
+            )}
           </Box>
           <Box display='flex' justifyContent='space-between' alignItems='center'>
             <Typography
@@ -93,13 +105,15 @@ const StockCard = (props) => {
             </Box>
           </Box>
         </Box>
-        {processedData && processedData.length > 0 && <StockCardBody processedData={processedData} historicalInfo={historicalInfo} mini={mini} />}
+        {processedData && processedData.length > 0 && (
+          <StockCardBody processedData={processedData} historicalInfo={historicalInfo} mini={mini} expanded={expanded} />
+        )}
       </CardContent>
     </Card>
   );
 };
 
-const StockCardBody = ({ historicalInfo, processedData, mini }) => {
+const StockCardBody = ({ historicalInfo, processedData, mini, expanded }) => {
   const baseDate = processedData.find((item) => item.type === 'base');
   const highestDate = processedData.find((item) => item.type === 'highest');
   const latestDate = processedData.find((item) => item.type === 'latest');
@@ -138,7 +152,13 @@ const StockCardBody = ({ historicalInfo, processedData, mini }) => {
     </Box>
   ) : (
     <Box>
-      <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
+      <PriceInfoBody baseDate={baseDate} highestDate={highestDate} latestDate={latestDate} />
+      <Collapse in={expanded}>
+        <Box mt={1}></Box>
+        <StockChart rawData={historicalInfo} />
+      </Collapse>
+      {/* <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
+        <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
         <PriceColumn
           label='四個月內最高'
           date={highestDate.date}
@@ -146,35 +166,72 @@ const StockCardBody = ({ historicalInfo, processedData, mini }) => {
           diff={highestDate.diff}
           diffPercent={highestDate.diffPercent}
         />
-        <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
         <PriceColumn label='最近交易日' date={latestDate.date} price={latestDate.price} diff={latestDate.diff} diffPercent={latestDate.diffPercent} />
-      </Box>
-      {/* <StockChart rawData={historicalInfo} /> */}
+      </Box> */}
     </Box>
   );
 };
 
-const PriceColumn = ({ label, date, price, diff, diffPercent }) => (
-  <Box display='flex' flexDirection='column' alignItems='center'>
-    <Typography variant='body2' fontWeight='bold'>
-      {label}
-    </Typography>
-    <Typography variant='body2' color='text.secondary' fontSize='0.75rem'>
-      {toYYYYMMDDWithSeparator(date, '-')}
-    </Typography>
-    <Typography variant='h6' fontWeight='bold'>
-      {price.toFixed(2)}
-    </Typography>
-    {diff !== null && (
-      <Typography variant='body2' color={diff >= 0 ? 'error.main' : 'success.main'}>
-        {diff.toFixed(1)}
-        <br />({diffPercent.toFixed(2)}%)
-      </Typography>
-    )}
-    {diff === null && <Typography variant='body2'>-</Typography>}
-  </Box>
-);
+// const PriceColumn = ({ label, date, price, diff, diffPercent }) => (
+//   <Box display='flex' flexDirection='column' alignItems='center'>
+//     <Typography variant='body2' fontWeight='bold'>
+//       {label}
+//     </Typography>
+//     <Typography variant='body2' color='text.secondary' fontSize='0.75rem'>
+//       {toYYYYMMDDWithSeparator(date, '-')}
+//     </Typography>
+//     <Typography variant='h6' fontWeight='bold'>
+//       {price.toFixed(2)}
+//     </Typography>
+//     {diff !== null && (
+//       <Typography variant='body2' color={diff >= 0 ? 'error.main' : 'success.main'}>
+//         {diff.toFixed(1)}
+//         <br />({diffPercent.toFixed(2)}%)
+//       </Typography>
+//     )}
+//     {diff === null && <Typography variant='body2'>-</Typography>}
+//   </Box>
+// );
 
+const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
+  const priceData = [
+    { label: '基準', ...baseDate },
+    { label: '最高', ...highestDate },
+    { label: '最近', ...latestDate },
+  ];
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', p: 0, mt: 1 }}>
+      {priceData.map((item, index) => (
+        <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+          <Typography variant='caption' sx={{ width: '15%', textAlign: 'left' }}>
+            {item.label}
+          </Typography>
+          <Typography variant='body2' sx={{ width: '30%' }}>
+            {toYYYYMMDDWithSeparator(item.date, '-')}
+          </Typography>
+          <Typography variant='body1' sx={{ width: '25%', fontWeight: 'bold' }}>
+            {item.price.toFixed(2)}
+          </Typography>
+          {item.diff !== null && item.diff !== 0 ? (
+            <Typography
+              variant='body2'
+              sx={{
+                width: '30%',
+                color: item.diff >= 0 ? 'error.main' : 'success.main',
+                textAlign: 'right',
+              }}
+            >
+              {item.diff.toFixed(1)} ({item.diffPercent.toFixed(2)}%)
+            </Typography>
+          ) : (
+            <Box sx={{ width: '30%', textAlign: 'right' }}> - </Box>
+          )}
+        </Box>
+      ))}
+    </Box>
+  );
+};
 export default StockCard;
 
 function useFavorite(post) {
