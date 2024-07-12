@@ -2,16 +2,17 @@
 
 import PageTitle from '../common/PageTitle';
 import TeaLoading from '../common/TeaLoading';
+import { Box } from '@mui/material';
 
 function Home() {
   return (
-    <div className='App'>
+    <Box sx={{ textAlign: 'center' }}>
       <div>
         <PageTitle titleText={`COMING SOON`} />
         <div>ထ days left</div>
         <TeaLoading />
       </div>
-    </div>
+    </Box>
   );
 }
 
