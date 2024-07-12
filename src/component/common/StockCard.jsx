@@ -1,22 +1,20 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { favoritesState } from '../../state/atoms';
 import { Card, CardContent, Typography, Box, Chip, IconButton, Collapse } from '@mui/material';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
-import api from '../../utility/api';
 import StockChart from './StockChart';
+import useFavorite from '../../hook/useFavoritePost';
 
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
   window.open(url, '_blank');
 };
 
-const StockCard = (props) => {
+export default function StockCard(props) {
   const { post, mini } = props;
   const { isRecentPost, processedData, historicalInfo } = post;
   const [isFavorite, handleFavoriteClick] = useFavorite(post);
@@ -111,7 +109,7 @@ const StockCard = (props) => {
       </CardContent>
     </Card>
   );
-};
+}
 
 const StockCardBody = ({ historicalInfo, processedData, mini, expanded }) => {
   const baseDate = processedData.find((item) => item.type === 'base');
@@ -157,41 +155,9 @@ const StockCardBody = ({ historicalInfo, processedData, mini, expanded }) => {
         <Box mt={1}></Box>
         <StockChart rawData={historicalInfo} />
       </Collapse>
-      {/* <Box display='flex' justifyContent='space-between' mt={1} mb={0}>
-        <PriceColumn label='基準日' date={baseDate.date} price={baseDate.price} diff={null} diffPercent={null} />
-        <PriceColumn
-          label='四個月內最高'
-          date={highestDate.date}
-          price={highestDate.price}
-          diff={highestDate.diff}
-          diffPercent={highestDate.diffPercent}
-        />
-        <PriceColumn label='最近交易日' date={latestDate.date} price={latestDate.price} diff={latestDate.diff} diffPercent={latestDate.diffPercent} />
-      </Box> */}
     </Box>
   );
 };
-
-// const PriceColumn = ({ label, date, price, diff, diffPercent }) => (
-//   <Box display='flex' flexDirection='column' alignItems='center'>
-//     <Typography variant='body2' fontWeight='bold'>
-//       {label}
-//     </Typography>
-//     <Typography variant='body2' color='text.secondary' fontSize='0.75rem'>
-//       {toYYYYMMDDWithSeparator(date, '-')}
-//     </Typography>
-//     <Typography variant='h6' fontWeight='bold'>
-//       {price.toFixed(2)}
-//     </Typography>
-//     {diff !== null && (
-//       <Typography variant='body2' color={diff >= 0 ? 'error.main' : 'success.main'}>
-//         {diff.toFixed(1)}
-//         <br />({diffPercent.toFixed(2)}%)
-//       </Typography>
-//     )}
-//     {diff === null && <Typography variant='body2'>-</Typography>}
-//   </Box>
-// );
 
 const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
   const priceData = [
@@ -232,40 +198,3 @@ const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
     </Box>
   );
 };
-export default StockCard;
-
-function useFavorite(post) {
-  const [favorites, setFavorites] = useRecoilState(favoritesState);
-
-  const isFavorite = favorites.posts.some((p) => p.id === post.id);
-
-  const toggleFavorite = useCallback(async () => {
-    const newFavoriteStatus = !isFavorite;
-
-    try {
-      const response = await api.get(`/my/post/${post.id}/favorite`);
-      if (response.success) {
-        setFavorites((prev) => {
-          if (newFavoriteStatus) {
-            return {
-              ...prev,
-              posts: [...prev.posts, post],
-            };
-          } else {
-            return {
-              ...prev,
-              posts: prev.posts.filter((p) => p.id !== post.id),
-            };
-          }
-        });
-      } else {
-        alert('收藏失敗');
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      alert('收藏失敗');
-    }
-  }, [isFavorite, post, setFavorites]);
-
-  return [isFavorite, toggleFavorite];
-}
