@@ -2,7 +2,6 @@ import React, { lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import './css/App.css';
-import './css/form.css';
 import './css/tab.css';
 
 import Home from './page/Home';

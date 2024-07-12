@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
-
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
 
@@ -21,12 +21,13 @@ export const getLoginStatus = () => {
 
 export default function LoginPage(props) {
   return (
-    <div className='App'>
-      <PageTitle titleText={'LOGIN'} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <PageTitle titleText='LOGIN' />
       <InputAccountAndVerifyCode />
-    </div>
+    </Box>
   );
 }
+
 export function InputAccountAndVerifyCode(props) {
   const [channel, setChannel] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
@@ -58,28 +59,49 @@ export function InputAccountAndVerifyCode(props) {
   };
 
   return (
-    <>
+    <Paper sx={{ p: 3, width: '400px' }}>
       {!isCodeSent ? (
-        <div>
-          <div style={{ marginBottom: '20px' }}>📢 說明: 輸入註冊Notify時輸入的名稱</div>
-          <input className='regis-input' type='text' value={channel} onChange={(e) => setChannel(e.target.value)} required placeholder='輸入註冊名字' />
-          <div className='regis-item-gap-20' />
-          <button className='regis-button' onClick={handleSendVerifyCode}>
+        <Box>
+          <Typography variant='body2' sx={{ mb: 2 }}>
+            📢 說明: 輸入註冊Notify時輸入的名稱
+          </Typography>
+          <TextField
+            fullWidth
+            variant='outlined'
+            label='輸入註冊名字'
+            value={channel}
+            onChange={(e) => setChannel(e.target.value)}
+            required
+            sx={{ mb: 2 }}
+          />
+          <Button variant='contained' fullWidth onClick={handleSendVerifyCode}>
             獲取驗證碼
-          </button>
-        </div>
+          </Button>
+        </Box>
       ) : (
-        <div>
-          <div style={{ marginBottom: '20px' }}>📢 說明: 輸入Line收到的驗證碼</div>
-          <input className='regis-input' type='text' value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} required placeholder='輸入驗證碼' />
-
-          <div className='regis-item-gap-20' />
-          <button className='regis-button' onClick={handleVerifyCode}>
+        <Box>
+          <Typography variant='body2' sx={{ mb: 2 }}>
+            📢 說明: 輸入Line收到的驗證碼
+          </Typography>
+          <TextField
+            fullWidth
+            variant='outlined'
+            label='輸入驗證碼'
+            value={verifyCode}
+            onChange={(e) => setVerifyCode(e.target.value)}
+            required
+            sx={{ mb: 2 }}
+          />
+          <Button variant='contained' fullWidth onClick={handleVerifyCode}>
             送出驗證碼
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
-      {message && <p>{message}</p>}
-    </>
+      {message && (
+        <Typography variant='body2' sx={{ mt: 2 }}>
+          {message}
+        </Typography>
+      )}
+    </Paper>
   );
 }

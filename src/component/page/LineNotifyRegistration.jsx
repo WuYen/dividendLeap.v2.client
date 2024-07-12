@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Box, TextField, Button, Typography, Paper, Link, CircularProgress } from '@mui/material';
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
 
+// line/registration/callback?tokenInfo=%7B"channel":"123","token":"vLxmzyPpkuGZYDPy53d2cLXGk3hJ4iil4vI4G1SBpSI","updateDate":"20240712","notifyEnabled":true,"tokenLevel":["basic"],"verifyCode":null,"verifyCodeExpires":null,"favoritePosts":[],"_id":"66914e62a0c871f191cb3691","__v":0%7D
 export default function LineNotifyRegistration(props) {
   const { isCallbackPage } = props;
 
   return (
-    <div className='App'>
-      <div>
-        <PageTitle titleText={'REGISTRATION'} />
-        {isCallbackPage ? <CallbackPage /> : <AccountForm />}
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <PageTitle titleText='REGISTRATION' />
+      {isCallbackPage ? <CallbackPage /> : <AccountForm />}
+    </Box>
   );
 }
 
@@ -42,24 +42,19 @@ function CallbackPage(props) {
 
   return (
     tokenInfoObject && (
-      <div>
-        <div style={{ marginBottom: '20px' }}>
+      <Paper sx={{ p: 3, width: '400px' }}>
+        <Typography variant='body2' sx={{ mb: 2 }}>
           📢 說明: 解除通知請
-          <a
-            href='https://help2.line.me/line_notify/web/pc?lang=zh-Hant&contentId=20003056'
-            className='reference-link'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
+          <Link href='https://help2.line.me/line_notify/web/pc?lang=zh-Hant&contentId=20003056' target='_blank' rel='noopener noreferrer'>
             參考
-          </a>
-        </div>
-        <label>恭喜</label>
-        <div className='regis-item-gap-10' />
-        <label>{tokenInfoObject.channel} 大大</label>
-        <div className='regis-item-gap-10' />
-        <label>註冊成功</label>
-      </div>
+          </Link>
+        </Typography>
+        <Typography>恭喜</Typography>
+        <Box sx={{ mb: 2 }} />
+        <Typography>{tokenInfoObject.channel} 大大</Typography>
+        <Box sx={{ mb: 2 }} />
+        <Typography>註冊成功</Typography>
+      </Paper>
     )
   );
 }
@@ -80,13 +75,13 @@ export function AccountForm(props) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    var form = event.target;
+    const form = event.target;
     form.reportValidity(); // Trigger HTML5 validation messages
     if (form.checkValidity()) {
       setIsLoading(true);
       try {
-        var resData = await handleAPICall(account.username);
-        var status = resData.error ? 'FAILED' : 'SUCCESS';
+        const resData = await handleAPICall(account.username);
+        const status = resData.error ? 'FAILED' : 'SUCCESS';
         setResponseData({ status, data: resData });
         console.log('handleSubmit success', resData);
       } catch (error) {
@@ -98,7 +93,7 @@ export function AccountForm(props) {
   };
 
   const handleAPICall = async (channel) => {
-    const realAPICallPromise = api.get('/line/regis?channel=' + channel);
+    const realAPICallPromise = api.get(`/line/regis?channel=${channel}`);
 
     // 為了要能顯示loading, 故意卡一秒
     const [response] = await Promise.all([realAPICallPromise, new Promise((resolve) => setTimeout(resolve, 1000))]);
@@ -111,7 +106,7 @@ export function AccountForm(props) {
   };
 
   useEffect(() => {
-    let timeoutIds = [];
+    const timeoutIds = [];
     if (responseData && responseData.status) {
       if (responseData.status === 'FAILED') {
         const focusTimeoutId = setTimeout(() => {
@@ -142,51 +137,51 @@ export function AccountForm(props) {
     };
   }, [responseData]);
 
-  var { status } = responseData ? responseData : {};
+  const { status } = responseData || {};
 
   return (
-    <>
-      <div style={{ marginBottom: '20px' }}>📢 說明: 註冊後會收到分類為 [標的] 的PTT股版PO文</div>
+    <Paper sx={{ p: 3, width: '400px' }}>
+      <Typography variant='body2' sx={{ mb: 2 }}>
+        📢 說明: 註冊後會收到分類為 [標的] 的PTT股版PO文
+      </Typography>
       <form onSubmit={handleSubmit}>
-        <input
-          ref={inputRef} // Set the input reference
-          className='regis-input'
-          type='text'
+        <TextField
+          inputRef={inputRef} // Set the input reference
+          fullWidth
+          variant='outlined'
+          label='請問你的名字'
           name='username'
-          id='username'
           value={account.username}
           onChange={handleChange}
           disabled={isLoading} // Disable input while loading
           required
-          placeholder='請問你的名字'
+          sx={{ mb: 2 }}
         />
-        <div className='regis-item-gap-20' />
         {isLoading ? (
-          <div className='regis-button'>Loading...</div>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress />
+          </Box>
         ) : status ? (
-          <div className={`regis-button ${status.toLowerCase()}`}>
+          <Button variant='contained' fullWidth disabled className={status.toLowerCase()}>
             {status === 'FAILED' ? 'No~~ 失敗了' : 'Yes!! 成功了'}
-            <br />
-            <label>{responseData?.data?.error || ''}</label>
-          </div>
+            {responseData?.data?.error && <Typography>{responseData.data.error}</Typography>}
+          </Button>
         ) : (
-          <button className='regis-button' type='submit'>
+          <Button variant='contained' fullWidth type='submit'>
             註冊LINE通知
-          </button>
+          </Button>
         )}
 
-        <div style={{ display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
-          <div className='regis-item-gap-10' />
-          <a ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
+        <Box sx={{ mt: 2, display: redirectLinkRef.current && redirectLinkRef.current.redirectUrl ? 'block' : 'none' }}>
+          <Link ref={linkRef} href={redirectLinkRef.current.redirectUrl} rel='noopener noreferrer'>
             兩秒後沒有自動跳轉請點這
-          </a>
-        </div>
-
-        <div className='regis-item-gap-10' />
+          </Link>
+        </Box>
       </form>
-    </>
+    </Paper>
   );
 }
+
 // 方法1. 先打开一个空白页, 再更新它的地址
 
 // let oWindow = window.open("", "_blank");
