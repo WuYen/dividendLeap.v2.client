@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Paper, InputBase, IconButton, Select, MenuItem, FormControl, InputLabel, Badge } from '@mui/material';
+import { Box, Paper, InputBase, IconButton, Select, MenuItem } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { debounce } from 'lodash';
 
-const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) => {
+export const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) => {
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
@@ -15,26 +14,32 @@ const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) => {
     };
   }, [searchText, onSearchTextChange]);
 
+  useEffect(() => {
+    if (tags.length > 0 && !activeTag) {
+      onTagChange(tags[0]);
+    }
+  }, [tags, activeTag, onTagChange]);
+
+  const handleTagChange = (event) => {
+    onTagChange(event.target.value);
+  };
+
   return (
     <Box
       sx={{
-        maxWidth: '600px',
-        margin: '0 auto 20px',
+        maxWidth: '450px',
+        margin: '0 auto 10px',
         position: 'relative',
         display: 'flex',
-        alignItems: 'center',
-        gap: 2,
+        gap: '8px',
       }}
     >
       <Paper
-        component='form'
         sx={{
           p: '2px 4px',
           display: 'flex',
           alignItems: 'center',
-          borderRadius: '4px',
           flex: 1,
-          backgroundColor: '#f5f5f5', // Background color similar to your example
         }}
       >
         <InputBase
@@ -48,57 +53,72 @@ const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) => {
           <SearchIcon />
         </IconButton>
       </Paper>
-      <Badge badgeContent={1} color='error'>
-        <Paper
+      <Paper sx={{ width: '85px', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+        <Select
+          value={activeTag || ''}
+          onChange={handleTagChange}
+          displayEmpty
           sx={{
-            p: '2px 4px',
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            backgroundColor: '#f5f5f5', // Background color similar to your example
+            width: '100%',
+            '& .MuiSelect-select': {
+              p: '8px 14px',
+              border: 'none',
+              textAlign: 'center',
+              paddingRight: '32px',
+              display: 'flex',
+              alignItems: 'center', // 垂直居中
+              justifyContent: 'center', // 水平居中
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
           }}
-          onClick={() => console.log('Filter clicked')} // Replace with actual filter logic
+          MenuProps={{
+            PaperProps: {
+              sx: { maxHeight: 200 },
+            },
+          }}
         >
-          <IconButton type='button' sx={{ p: '10px' }} aria-label='filter'>
-            <FilterListIcon />
-          </IconButton>
-          <Box sx={{ pr: 2 }}>Filter</Box>
-        </Paper>
-      </Badge>
+          {tags.map((tag) => (
+            <MenuItem key={tag} value={tag} sx={{ justifyContent: 'center', textAlign: 'center' }}>
+              {tag}
+            </MenuItem>
+          ))}
+        </Select>
+      </Paper>
     </Box>
   );
 };
 
-export function PostList(props) {
-  const { data, mini = false, tagFilter = true } = props;
-  const containTargetPosts = data.find((item) => item.tag === '標的');
-  const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-  const [searchText, setSearchText] = useState('');
+// export function PostList(props) {
+//   const { data, mini = false, tagFilter = true } = props;
+//   const containTargetPosts = data.find((item) => item.tag === '標的');
+//   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
+//   const [searchText, setSearchText] = useState('');
 
-  const handleSearchTextChange = (text) => {
-    setSearchText(text);
-  };
+//   const handleSearchTextChange = (text) => {
+//     setSearchText(text);
+//   };
 
-  const filteredData = data.filter((item) => {
-    return (activeTag === '全部' || item.tag === activeTag) && (!searchText || item.title.includes(searchText));
-  });
+//   const filteredData = data.filter((item) => {
+//     return (activeTag === '全部' || item.tag === activeTag) && (!searchText || item.title.includes(searchText));
+//   });
 
-  return (
-    <>
-      {tagFilter && (
-        <SearchBar
-          onSearchTextChange={handleSearchTextChange}
-          tags={containTargetPosts ? ['標的', '全部'] : ['全部']}
-          activeTag={activeTag}
-          onTagChange={setActiveTag}
-        />
-      )}
-      {filteredData.map((postInfo) => (
-        <StockCard key={postInfo.id} post={postInfo} mini={mini} />
-      ))}
-    </>
-  );
-}
+//   return (
+//     <>
+//       {tagFilter && (
+//         <SearchBar
+//           onSearchTextChange={handleSearchTextChange}
+//           tags={containTargetPosts ? ['標的', '全部'] : ['全部']}
+//           activeTag={activeTag}
+//           onTagChange={setActiveTag}
+//         />
+//       )}
+//       {filteredData.map((postInfo) => (
+//         <StockCard key={postInfo.id} post={postInfo} mini={mini} />
+//       ))}
+//     </>
+//   );
+// }
 
-export default PostList;
+// export default PostList;
