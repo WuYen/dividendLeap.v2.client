@@ -1,8 +1,6 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import './css/tab.css';
-
 import Home from './page/Home';
 import ServerError from './page/ServerError';
 import LineNotifyRegistration from './page/LineNotifyRegistration';

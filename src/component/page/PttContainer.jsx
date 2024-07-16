@@ -5,6 +5,7 @@ import api from '../../utility/api';
 import TeaLoading from '../common/TeaLoading';
 import PageTitle from '../common/PageTitle';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
+import { PostTabs } from '../common/Tabs';
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -44,32 +45,6 @@ export default function PttContainer() {
       <PageTitle titleText={`作者: ${id} 貼文`} />
       <div style={{ marginBottom: '20px' }}>📢 顯示發文後四個月內最高點(不包含新貼文)</div>
       {isLoading || needLoading ? <TeaLoading /> : data.length === 0 ? <label>無資料</label> : <HistoryList data={data} />}
-    </div>
-  );
-}
-
-function PostTabs(props) {
-  const { activeTag, onSetActiveTag, containTargetPosts } = props;
-
-  const tagArray = containTargetPosts ? ['標的', '全部'] : ['全部']; //Array.from(tags).concat('全部');
-  return (
-    <div className='container'>
-      <div className='tabs'>
-        {tagArray.map((tag) => (
-          <React.Fragment key={tag}>
-            <input type='radio' id={`radio-${tag}`} name='tabs' checked={activeTag === tag} onChange={() => onSetActiveTag(tag)} />
-            <label className={`tab ${activeTag === tag ? 'active' : ''}`} htmlFor={`radio-${tag}`}>
-              {tag}
-            </label>
-          </React.Fragment>
-        ))}
-        <span
-          className='glider'
-          style={{
-            transform: `translateX(${(tagArray.indexOf(activeTag) - 1) * 100 + 100}%)`,
-          }}
-        ></span>
-      </div>
     </div>
   );
 }
