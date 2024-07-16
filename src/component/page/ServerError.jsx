@@ -1,13 +1,14 @@
-// import { useEffect, useState } from 'react';
-
 import PageTitle from '../common/PageTitle';
+import { Box, Typography } from '@mui/material';
 
 function ServerError() {
   return (
-    <div className='App'>
+    <Box sx={{ textAlign: 'center' }}>
       <PageTitle titleText={'🐒 Oops!'}></PageTitle>
-      <p>Looks like something went wrong.</p>
-    </div>
+      <Typography variant='body2' sx={{ mb: 2 }}>
+        Looks like something went wrong.
+      </Typography>
+    </Box>
   );
 }
 

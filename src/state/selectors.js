@@ -1,26 +1,24 @@
-import { selector } from 'recoil';
-import { postsState, authorsState } from './atoms';
+import { selectorFamily } from 'recoil';
+import { favoritesState } from './atoms';
 
-export const filteredPostsState = selector({
-  key: 'filteredPostsState',
-  get: ({ get }) => {
-    const posts = get(postsState);
-    const favorites = get(favoritesState).posts;
-    return posts.map((post) => ({
-      ...post,
-      isFavorite: favorites.includes(post.id),
-    }));
-  },
-});
-
-// export const filteredAuthorsState = selector({
-//   key: 'filteredAuthorsState',
+// export const filteredPostsState = selector({
+//   key: 'filteredPostsState',
 //   get: ({ get }) => {
-//     const authors = get(authorsState);
-//     const favorites = get(favoritesState).authors;
-//     return authors.map((author) => ({
-//       ...author,
-//       isFavorite: favorites.includes(author.id),
+//     const posts = get(postsState);
+//     const favorites = get(favoritesState).posts;
+//     return posts.map((post) => ({
+//       ...post,
+//       isFavorite: favorites.includes(post.id),
 //     }));
 //   },
 // });
+
+export const isFavoritePostSelector = selectorFamily({
+  key: 'isFavoritePostSelector',
+  get:
+    (postId) =>
+    ({ get }) => {
+      const favorites = get(favoritesState);
+      return favorites.posts.some((post) => post.id === postId);
+    },
+});

@@ -11,7 +11,7 @@ jest.mock('../../utility/api', () => ({
 describe('Test AccountForm', () => {
   test('renders loading and submit', async () => {
     render(<AccountForm />);
-    const inputField = screen.getByPlaceholderText('請問你的名字');
+    const inputField = screen.getByRole('textbox', { name: '請問你的名字' });
     const submitButton = screen.getByText('註冊LINE通知');
 
     // Simulate user input
@@ -21,7 +21,7 @@ describe('Test AccountForm', () => {
     fireEvent.click(submitButton);
 
     // Verify that the loading element is shown
-    const loadingElement = await screen.findByText('Loading...');
+    const loadingElement = screen.getByRole('progressbar');
     expect(loadingElement).toBeInTheDocument();
   });
 
@@ -37,20 +37,33 @@ describe('Test AccountForm', () => {
     render(<AccountForm />);
 
     // Simulate user input
-    const usernameInput = screen.getByPlaceholderText('請問你的名字');
+    const usernameInput = screen.getByRole('textbox', { name: '請問你的名字' });
     fireEvent.change(usernameInput, { target: { value: 'validUsername' } });
 
     const submitButton = screen.getByText('註冊LINE通知');
     fireEvent.click(submitButton);
 
     // Wait for the loading state to finish
-    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument(), { timeout: 2000 });
+    const loadingElement = screen.getByRole('progressbar');
+    await waitFor(() => expect(loadingElement).not.toBeInTheDocument(), { timeout: 2000 });
 
-    // Assert the success message is displayed
-    expect(screen.getByText(/Yes!! 成功了/i)).toBeInTheDocument();
+    const successButton = screen.getByRole('button', { name: /Yes!! 成功了/i });
+    expect(successButton).toBeInTheDocument();
+    expect(successButton).toBeDisabled();
+    expect(successButton).toHaveClass('success');
 
     // Assert the redirect link is displayed
-    expect(screen.getByText(/兩秒後沒有自動跳轉請點這/i)).toBeInTheDocument();
+    await waitFor(
+      () => {
+        const box = screen.getByText(/兩秒後沒有自動跳轉請點這/).closest('div');
+        expect(box).toBeInTheDocument();
+        expect(box).toHaveStyle('display: block');
+        const link = screen.getByRole('link', { name: /兩秒後沒有自動跳轉請點這/ });
+        expect(link).toBeInTheDocument();
+        expect(link.getAttribute('href')).toBe('https://example.com/redirect');
+      },
+      { timeout: 3000 }
+    );
   });
 
   test('submit fail', async () => {
@@ -60,7 +73,7 @@ describe('Test AccountForm', () => {
     render(<AccountForm />);
 
     // Simulate user input
-    const usernameInput = screen.getByPlaceholderText('請問你的名字');
+    const usernameInput = screen.getByRole('textbox', { name: '請問你的名字' });
     fireEvent.change(usernameInput, { target: { value: 'invalidUsername' } });
 
     // Submit the form
@@ -68,10 +81,11 @@ describe('Test AccountForm', () => {
     fireEvent.click(submitButton);
 
     // Wait for the loading state to finish
-    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument(), { timeout: 2000 });
+    const loadingElement = screen.getByRole('progressbar');
+    await waitFor(() => expect(loadingElement).not.toBeInTheDocument(), { timeout: 2000 });
 
-    // Assert the failure message is displayed
-    expect(screen.getByText(/No~~ 失敗了/i)).toBeInTheDocument();
+    const button = screen.getByRole('button', { name: /No~~ 失敗了/i });
+    expect(button).toBeInTheDocument();
     expect(screen.getByText('Invalid username')).toBeInTheDocument();
 
     // Assert the input field regains focus

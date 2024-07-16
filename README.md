@@ -68,3 +68,39 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### Project structure
+
+src/
+|-- component/
+| |-- common/
+| | |-- layout/
+| | | |-- Header.js
+| | | |-- Footer.js
+| | |-- ui/
+| | | |-- Button.js
+| | | |-- Input.js
+| | |-- card/
+| | |-- lists/
+| |-- page/
+| | |-- HomePage.js
+| | |-- ProductListPage.js
+| | |-- UserProfilePage.js
+| |-- App.js
+|-- state/
+| |-- atom/
+| | |-- userAtoms.js
+| | |-- productAtoms.js
+| |-- selector/
+| | |-- userSelectors.js
+| | |-- productSelectors.js
+|-- hook/
+| |-- useCustomHook1.js
+| |-- useCustomHook2.js
+|-- service/
+| |-- api.js
+| |-- authService.js
+|-- utility/
+| |-- helpers.js
+| |-- constants.js
+|-- index.js
