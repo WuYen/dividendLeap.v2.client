@@ -174,12 +174,12 @@ const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
             {item.label}
           </Typography>
           <Typography variant='body2' sx={{ width: '30%' }}>
-            {toYYYYMMDDWithSeparator(item.date, '-')}
+            {item.date ? toYYYYMMDDWithSeparator(item.date, '-') : '-'}
           </Typography>
           <Typography variant='body1' sx={{ width: '25%', fontWeight: 'bold' }}>
-            {item.price.toFixed(2)}
+            {item.price ? item.price.toFixed(2) : '-'}
           </Typography>
-          {item.diff !== null && item.diff !== 0 ? (
+          {item.diff && item.diff !== 0 ? (
             <Typography
               variant='body2'
               sx={{
