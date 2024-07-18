@@ -52,7 +52,7 @@ export function PostList(props) {
           onTagChange={setActiveTag}
         />
       )}
-      <div style={{ marginBottom: '20px' }}></div>
+      <div style={{ marginBottom: '10px' }}></div>
       {filteredData.map((postInfo, index) => (
         <StockCard key={`${postInfo.id}${index}`} post={postInfo} mini={mini} />
       ))}
