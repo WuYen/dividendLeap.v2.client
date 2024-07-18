@@ -1,27 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Paper, InputBase, IconButton, Select, MenuItem } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { debounce } from 'lodash';
 
-export const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) => {
+export const PostSearchBar = ({ onSearchTextChange, onSearchClick, tags, activeTag, onTagChange }) => {
   const [searchText, setSearchText] = useState('');
-
-  useEffect(() => {
-    const debouncedChange = debounce(onSearchTextChange, 300);
-    debouncedChange(searchText);
-    return () => {
-      debouncedChange.cancel();
-    };
-  }, [searchText, onSearchTextChange]);
-
-  useEffect(() => {
-    if (tags.length > 0 && !activeTag) {
-      onTagChange(tags[0]);
-    }
-  }, [tags, activeTag, onTagChange]);
+  const debouncedSearchChangeRef = useRef();
 
   const handleTagChange = (event) => {
     onTagChange(event.target.value);
+  };
+
+  useEffect(() => {
+    debouncedSearchChangeRef.current = debounce((text) => {
+      onSearchTextChange(text);
+    }, 300);
+
+    return () => {
+      if (debouncedSearchChangeRef.current) {
+        debouncedSearchChangeRef.current.cancel();
+      }
+    };
+  }, [onSearchTextChange]);
+
+  const handleSearchTextChange = (e) => {
+    const newText = e.target.value;
+    setSearchText(newText); // 立即更新本地狀態
+    debouncedSearchChangeRef.current(newText); // debounce 父組件的更新
   };
 
   return (
@@ -47,9 +53,21 @@ export const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) 
           placeholder='Search'
           inputProps={{ 'aria-label': 'search' }}
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={handleSearchTextChange}
         />
-        <IconButton type='button' sx={{ p: '10px' }} aria-label='search'>
+        {searchText && (
+          <IconButton
+            sx={{ p: '10px' }}
+            aria-label='clear'
+            onClick={() => {
+              setSearchText('');
+              onSearchTextChange('');
+            }}
+          >
+            <ClearIcon />
+          </IconButton>
+        )}
+        <IconButton type='button' sx={{ p: '10px' }} aria-label='search' onClick={() => onSearchClick(searchText)}>
           <SearchIcon />
         </IconButton>
       </Paper>
@@ -89,36 +107,3 @@ export const SearchBar = ({ onSearchTextChange, tags, activeTag, onTagChange }) 
     </Box>
   );
 };
-
-// export function PostList(props) {
-//   const { data, mini = false, tagFilter = true } = props;
-//   const containTargetPosts = data.find((item) => item.tag === '標的');
-//   const [activeTag, setActiveTag] = useState(containTargetPosts ? '標的' : '全部');
-//   const [searchText, setSearchText] = useState('');
-
-//   const handleSearchTextChange = (text) => {
-//     setSearchText(text);
-//   };
-
-//   const filteredData = data.filter((item) => {
-//     return (activeTag === '全部' || item.tag === activeTag) && (!searchText || item.title.includes(searchText));
-//   });
-
-//   return (
-//     <>
-//       {tagFilter && (
-//         <SearchBar
-//           onSearchTextChange={handleSearchTextChange}
-//           tags={containTargetPosts ? ['標的', '全部'] : ['全部']}
-//           activeTag={activeTag}
-//           onTagChange={setActiveTag}
-//         />
-//       )}
-//       {filteredData.map((postInfo) => (
-//         <StockCard key={postInfo.id} post={postInfo} mini={mini} />
-//       ))}
-//     </>
-//   );
-// }
-
-// export default PostList;

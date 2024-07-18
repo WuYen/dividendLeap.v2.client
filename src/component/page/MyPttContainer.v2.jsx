@@ -31,7 +31,7 @@ function PostListPage(props) {
   return (
     <>
       <TopNavTab defaultTab='文章' />
-      <PostList data={posts} />
+      <PostList data={posts} showSearch={true} tagFilter={false} />
     </>
   );
 }
