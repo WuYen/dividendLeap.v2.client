@@ -77,7 +77,7 @@ const SearchBar = ({ onSearchTextChange }) => {
     <Box
       sx={{
         maxWidth: '450px',
-        margin: '0 auto 20px',
+        margin: '0 auto 10px',
         position: 'relative',
       }}
     >
@@ -89,7 +89,13 @@ const SearchBar = ({ onSearchTextChange }) => {
           alignItems: 'center',
         }}
       >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Search author' inputProps={{ 'aria-label': 'search author' }} value={searchText} onChange={(e) => setSearchText(e.target.value)} />
+        <InputBase
+          sx={{ ml: 1, flex: 1 }}
+          placeholder='Search author'
+          inputProps={{ 'aria-label': 'search author' }}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
         <IconButton type='button' sx={{ p: '10px' }} aria-label='search' onClick={handleSearchClick}>
           <SearchIcon />
         </IconButton>
