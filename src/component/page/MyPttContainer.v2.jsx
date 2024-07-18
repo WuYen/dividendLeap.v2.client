@@ -140,11 +140,11 @@ function TopNavTab(props) {
         onTabClick={(tag) => {
           setActiveTag(tag);
           if (tag === '文章') {
-            navigate('/my');
+            navigate('/my', { replace: true });
           } else if (tag === '作者') {
-            navigate('/my/authors/rank');
+            navigate('/my/authors/rank', { replace: true });
           } else if (tag === 'My文章') {
-            navigate('/my/posts');
+            navigate('/my/posts', { replace: true });
           }
         }}
       />
