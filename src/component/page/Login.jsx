@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
 
@@ -29,11 +29,20 @@ export default function LoginPage(props) {
 }
 
 export function InputAccountAndVerifyCode(props) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [channel, setChannel] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [message, setMessage] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const channelFromQuery = searchParams.get('channel');
+    if (channelFromQuery) {
+      setChannel(channelFromQuery);
+    }
+  }, [location.search]);
 
   const handleSendVerifyCode = async () => {
     try {
