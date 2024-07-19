@@ -7,7 +7,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 
 const AuthorCard = (props) => {
-  const { author, maxRate, median, score, posts } = props;
+  const { name, maxRate, median, score, posts } = props;
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const AuthorCard = (props) => {
   };
 
   const handleAuthorClick = () => {
-    navigate(`/my/author/${author}`);
+    navigate(`/my/author/${name}`);
   };
 
   // const handleLikeClick = (e) => {
@@ -39,7 +39,7 @@ const AuthorCard = (props) => {
               textAlign: 'left',
             }}
           >
-            {author}
+            {name}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {/* {likeCount !== undefined && (
