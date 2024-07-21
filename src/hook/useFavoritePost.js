@@ -21,6 +21,21 @@ export default function useFavorite(post) {
       const response = await api.get(`/my/post/${post.id}/favorite`);
       if (!response.success) {
         throw new Error('收藏失敗');
+      } else {
+        if (response.data) {
+          setFavorites((prevState) => {
+            const newState = {
+              ...prevState,
+              posts: prevState.posts.map((p) => {
+                if (p.id === post.id) {
+                  console.log('state:', response.data, p);
+                }
+                return p.id === post.id ? { ...response.data } : p;
+              }),
+            };
+            return newState;
+          });
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);

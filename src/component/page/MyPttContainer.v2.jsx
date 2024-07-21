@@ -44,7 +44,7 @@ function MyPostListPage(props) {
   ) : (
     <>
       <TopNavTab defaultTab='My文章' />
-      <PostList data={favorites.posts} mini={true} tagFilter={false} />
+      <PostList data={favorites.posts} mini={true} tagFilter={false} isMyPost={true} />
     </>
   );
 }
