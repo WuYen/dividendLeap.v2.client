@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, Typography, Box, Chip, IconButton, TextField } from '@mui/material';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-// import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-// import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import useFavorite from '../../hook/useFavoritePost';
 import api from '../../utility/api';
 import { useSetRecoilState } from 'recoil';
 import { favoritesState } from '../../state/atoms';
 
+import { Card, CardContent, Typography, Box, Chip, IconButton, TextField, Skeleton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
@@ -180,36 +182,7 @@ export default function StockCard(props) {
             ) : (
               <NewPriceInfoRow post={post} />
             )}
-            {expanded && (
-              <Box display='flex' bgcolor='grey.100' pt={1} pb={0.5} px={0.5} borderRadius={1} mt={1}>
-                <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
-                  <Box flex={1} display='flex' flexDirection='column' alignItems='center' mr={1}>
-                    <Typography variant='caption' color='text.secondary' lineHeight={1}>
-                      進場
-                    </Typography>
-                    <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
-                      進場值
-                    </Typography>
-                  </Box>
-                  <Box flex={1} display='flex' flexDirection='column' alignItems='center' mr={1}>
-                    <Typography variant='caption' color='text.secondary' lineHeight={1}>
-                      停利
-                    </Typography>
-                    <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
-                      停利值
-                    </Typography>
-                  </Box>
-                  <Box flex={1} display='flex' flexDirection='column' alignItems='center'>
-                    <Typography variant='caption' color='text.secondary' lineHeight={1}>
-                      停損
-                    </Typography>
-                    <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
-                      停損值
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            )}
+            <ExpandPanel expanded={expanded} post={post} />
           </>
         )}
       </CardContent>
@@ -226,8 +199,8 @@ const StockCardToolbar = ({
   onFavoriteClick,
   // hasProcessedData,
   // mini,
-  // expanded,
-  // onExpandClick,
+  expanded,
+  onExpandClick,
 }) => {
   if (isEditing) {
     return (
@@ -250,9 +223,9 @@ const StockCardToolbar = ({
       <IconButton size='small' aria-label='bookmark' onClick={onFavoriteClick} sx={{ color: isFavorite ? 'primary.main' : 'inherit' }}>
         {isFavorite ? <BookmarkIcon fontSize='small' /> : <BookmarkBorderIcon fontSize='small' />}
       </IconButton>
-      {/* <IconButton onClick={onExpandClick} size='small'>
+      <IconButton onClick={onExpandClick} size='small'>
         {expanded ? <ExpandLessIcon fontSize='small' /> : <ExpandMoreIcon fontSize='small' />}
-      </IconButton> */}
+      </IconButton>
     </>
   );
 };
@@ -406,3 +379,124 @@ const StyledValuleInput = ({ value, onChange, ...props }) => (
     {...props}
   />
 );
+
+const ExpandPanel = (props) => {
+  const { expanded, post } = props;
+  const [analysisResults, setAnalysisResults] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (expanded) {
+      api
+        .get(`/my/post/${post.id}/stats`)
+        .then((response) => {
+          setAnalysisResults(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching analysis results:', error);
+          setLoading(false);
+        });
+    }
+  }, [expanded, post.id]);
+
+  return (
+    <>
+      {expanded && (
+        <Box p={0}>
+          <Typography variant='h6' gutterBottom>
+            技術指標分析結果
+          </Typography>
+          {loading ? (
+            <>
+              <Skeleton variant='text' height={40} />
+              <Skeleton variant='text' height={40} />
+              <Skeleton variant='text' height={40} />
+            </>
+          ) : (
+            <AnalysisResultsComponent results={analysisResults} />
+          )}
+        </Box>
+      )}
+    </>
+  );
+};
+
+const indicatorNames = {
+  isSMAUp: '簡單移動平均線向上',
+  isRSILow: '相對強弱指數低',
+  isMACDPositive: 'MACD正值',
+  isBollingerPositive: '布林帶正值',
+  isStochasticPositive: '隨機指標正值',
+  isPriceAboveCloud: '價格在雲之上',
+  isTenkanAboveKijun: '轉換線在基準線之上',
+  isSenkouSpanABullish: '先行線A看漲',
+  isChikouAbovePrice: '遲行線在價格之上',
+  recommandBuying: '推薦購買',
+};
+
+const AnalysisResultsComponent = ({ results }) => {
+  const positiveIndicators = [];
+  const negativeIndicators = [];
+
+  Object.keys(indicatorNames).forEach((key) => {
+    if (key !== 'recommandBuying') {
+      if (results[key]) {
+        positiveIndicators.push(indicatorNames[key]);
+      } else {
+        negativeIndicators.push(indicatorNames[key]);
+      }
+    }
+  });
+
+  return (
+    <>
+      <Box display='flex' flexDirection='row' flexWrap='wrap' mb={2}>
+        <Box display='flex' alignItems='flex-start' mr={4}>
+          <CheckCircleOutlineIcon style={{ color: 'green', marginRight: 8 }} />
+          <Typography style={{ textAlign: 'left', fontSize: '0.875rem' }}>{positiveIndicators.join('、')}</Typography>
+        </Box>
+        <Box display='flex' alignItems='flex-start'>
+          <HighlightOffIcon style={{ color: 'red', marginRight: 8 }} />
+          <Typography style={{ textAlign: 'left', fontSize: '0.875rem' }}>{negativeIndicators.join('、')}</Typography>
+        </Box>
+      </Box>
+      <Box display='flex' alignItems='flex-start'>
+        {results.recommandBuying ? (
+          <CheckCircleOutlineIcon style={{ color: 'green', marginRight: 8 }} />
+        ) : (
+          <HighlightOffIcon style={{ color: 'red', marginRight: 8 }} />
+        )}
+        <Typography>推薦指標數: {results.recommandCount}</Typography>
+      </Box>
+    </>
+  );
+};
+/* <Box display='flex' bgcolor='grey.100' pt={1} pb={0.5} px={0.5} borderRadius={1} mt={1}>
+        <Box display='flex' alignItems='center' justifyContent='space-between' width='100%'>
+          <Box flex={1} display='flex' flexDirection='column' alignItems='center' mr={1}>
+            <Typography variant='caption' color='text.secondary' lineHeight={1}>
+              進場
+            </Typography>
+            <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
+              進場值
+            </Typography>
+          </Box>
+          <Box flex={1} display='flex' flexDirection='column' alignItems='center' mr={1}>
+            <Typography variant='caption' color='text.secondary' lineHeight={1}>
+              停利
+            </Typography>
+            <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
+              停利值
+            </Typography>
+          </Box>
+          <Box flex={1} display='flex' flexDirection='column' alignItems='center'>
+            <Typography variant='caption' color='text.secondary' lineHeight={1}>
+              停損
+            </Typography>
+            <Typography variant='body2' fontWeight='bold' lineHeight='1.5rem'>
+              停損值
+            </Typography>
+          </Box>
+        </Box>
+      </Box> */
