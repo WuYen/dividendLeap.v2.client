@@ -17,6 +17,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
+import StockChart from './StockChart';
+import { PriceInfoBody } from './StockCard';
+
 const openNewPage = (path) => {
   const url = `https://www.ptt.cc/${path}`;
   window.open(url, '_blank');
@@ -382,6 +385,7 @@ const StyledValuleInput = ({ value, onChange, ...props }) => (
 
 const ExpandPanel = (props) => {
   const { expanded, post } = props;
+  const { processedData, historicalInfo } = post;
   const [analysisResults, setAnalysisResults] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -400,10 +404,19 @@ const ExpandPanel = (props) => {
     }
   }, [expanded, post.id]);
 
+  const baseDate = processedData.find((item) => item.type === 'base');
+  const highestDate = processedData.find((item) => item.type === 'highest');
+  const latestDate = processedData.find((item) => item.type === 'latest');
+
   return (
     <>
       {expanded && (
         <Box p={0}>
+          <Box mt={1}></Box>
+          <PriceInfoBody baseDate={baseDate} highestDate={highestDate} latestDate={latestDate} />
+          <Box mt={1}></Box>
+          <StockChart rawData={historicalInfo} />
+          <Box mt={1}></Box>
           <Typography variant='h6' gutterBottom>
             技術指標分析結果
           </Typography>

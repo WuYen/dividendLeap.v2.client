@@ -159,7 +159,7 @@ const StockCardBody = ({ historicalInfo, processedData, mini, expanded }) => {
   );
 };
 
-const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
+export const PriceInfoBody = ({ baseDate, highestDate, latestDate }) => {
   const priceData = [
     { label: '基準', ...baseDate },
     { label: '最高', ...highestDate },
