@@ -24,3 +24,11 @@ export const authorsRankState = atom({
   key: 'authorsRankState',
   default: [],
 });
+
+export const authState = atom({
+  key: 'authState',
+  default: {
+    isLoggedIn: false,
+    userInfo: null,
+  },
+});
