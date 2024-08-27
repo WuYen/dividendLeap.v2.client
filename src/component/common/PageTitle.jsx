@@ -4,7 +4,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
-export default function PageTitle({ titleText }) {
+export default function PageTitle({ titleText, isLoggedIn = false }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
@@ -46,85 +46,90 @@ export default function PageTitle({ titleText }) {
             {titleText}
           </Typography>
           <Box sx={{ flexGrow: 1 }} /> {/* 使用 Box 佔據左邊空間 */}
-          <IconButton
-            edge='end'
-            sx={{
-              color: 'rgba(0, 0, 0, 0.54)',
-              padding: 0,
-              width: '48px',
-              height: '48px', // 強制 IconButton 高度與 Toolbar 匹配
-              position: 'absolute',
-              right: 8, // 將 IconButton 固定在右側
-            }}
-            onClick={toggleDrawer(true)}
-          >
-            <AccountCircleIcon />
-          </IconButton>
+          {isLoggedIn && (
+            <IconButton
+              edge='end'
+              sx={{
+                color: 'rgba(0, 0, 0, 0.54)',
+                padding: 0,
+                width: '48px',
+                height: '48px', // 強制 IconButton 高度與 Toolbar 匹配
+                position: 'absolute',
+                right: 8, // 將 IconButton 固定在右側
+              }}
+              onClick={toggleDrawer(true)}
+            >
+              <AccountCircleIcon />
+            </IconButton>
+          )}
         </Toolbar>
         <Divider />
       </AppBar>
 
-      <Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
-        <div role='presentation' onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)} style={{ width: 250, padding: '8px' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              height: '48px', // Drawer 標題行高度設為 48px
-            }}
-          >
-            <Typography
-              variant='h6'
-              sx={{
-                lineHeight: '48px', // 確保文字垂直居中
-                fontSize: '1.25rem',
-              }}
-            >
-              用戶名稱
-            </Typography>
-            <IconButton
-              edge='end'
-              size='small'
-              sx={{
-                width: '48px',
-                height: '48px',
-                padding: 0,
-                paddingRight: '8px',
-              }}
-              onClick={toggleDrawer(false)}
-            >
-              <CloseIcon />
-            </IconButton>
-          </div>
-          <Divider sx={{ margin: '0' }} />
-          <ListItem sx={{ paddingLeft: 0 }}>
-            <ListItemIcon sx={{ minWidth: '35px' }}>
-              <NotificationsIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Link href='#' underline='none' sx={{ color: 'inherit' }}>
-                  設定推播關鍵字
-                </Link>
-              }
-            />
-          </ListItem>
-        </div>
-      </Drawer>
+      {isLoggedIn && <DrawerPanel drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} />}
     </>
   );
 }
 
-// import { useEffect, useState } from 'react';
-
-// export default function PageTitle(props) {
-//   const { titleText } = props;
-
-//   return (
-//     <>
-//       <h1 style={{ marginTop: '10px', marginBottom: '10px' }}>{titleText}</h1>
-//       <hr style={{ margin: 'auto', width: '100%', maxWidth: '490px', marginBottom: '10px' }} />
-//     </>
-//   );
-// }
+function DrawerPanel(props) {
+  const { drawerOpen, toggleDrawer } = props;
+  return (
+    <Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
+      <div role='presentation' onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)} style={{ width: 250, padding: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: '48px', // Drawer 標題行高度設為 48px
+          }}
+        >
+          <Typography
+            variant='h6'
+            sx={{
+              lineHeight: '48px', // 確保文字垂直居中
+              fontSize: '1.25rem',
+            }}
+          >
+            用戶名稱
+          </Typography>
+          <IconButton
+            edge='end'
+            size='small'
+            sx={{
+              width: '48px',
+              height: '48px',
+              padding: 0,
+              paddingRight: '8px',
+            }}
+            onClick={toggleDrawer(false)}
+          >
+            <CloseIcon />
+          </IconButton>
+        </div>
+        <Divider sx={{ margin: '0' }} />
+        <ListItem sx={{ paddingLeft: 0 }}>
+          <ListItemIcon sx={{ minWidth: '35px' }}>
+            <NotificationsIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary={
+              <Link href='/my/setting' underline='none' sx={{ color: 'inherit' }}>
+                設定推播關鍵字
+              </Link>
+            }
+          />
+        </ListItem>
+        {/* <ListItem sx={{ paddingLeft: 0 }}>
+          <ListItemText
+            primary={
+              <Link href='/my' underline='none' sx={{ color: 'inherit' }}>
+                MY PAGE
+              </Link>
+            }
+          />
+        </ListItem> */}
+      </div>
+    </Drawer>
+  );
+}

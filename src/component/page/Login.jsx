@@ -61,7 +61,7 @@ export function InputAccountAndVerifyCode(props) {
       localStorage.setItem('token', response.data);
       setTimeout(() => {
         navigate(`/my`, { replace: true });
-      }, 2000);
+      }, 1200);
     } catch (error) {
       setMessage('驗證失敗');
     }
@@ -93,6 +93,7 @@ export function InputAccountAndVerifyCode(props) {
             📢 說明: 輸入Line收到的驗證碼
           </Typography>
           <TextField
+            autoComplete='off'
             fullWidth
             variant='outlined'
             label='輸入驗證碼'

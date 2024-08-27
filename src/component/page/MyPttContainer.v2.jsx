@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useRecoilValue, RecoilRoot, useSetRecoilState, useRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
 import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -13,16 +13,14 @@ import TeaLoading from '../common/TeaLoading';
 
 export default function MyPttContainer() {
   return (
-    <RecoilRoot>
-      <DataLoader>
-        <Routes>
-          <Route path='/' element={<PostListPage />} />
-          <Route path='/posts' element={<MyPostListPage />} />
-          <Route path='/authors/rank' element={<AuthorRankPage />} />
-          <Route path='/author/:id' element={<AuthorPostsPage />} />
-        </Routes>
-      </DataLoader>
-    </RecoilRoot>
+    <DataLoader>
+      <Routes>
+        <Route path='/' element={<PostListPage />} />
+        <Route path='/posts' element={<MyPostListPage />} />
+        <Route path='/authors/rank' element={<AuthorRankPage />} />
+        <Route path='/author/:id' element={<AuthorPostsPage />} />
+      </Routes>
+    </DataLoader>
   );
 }
 

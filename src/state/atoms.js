@@ -1,5 +1,6 @@
 // atoms.js
 import { atom } from 'recoil';
+import { getLoginStatus } from '../component/page/Login';
 
 export const postsState = atom({
   key: 'postsState',
@@ -27,8 +28,11 @@ export const authorsRankState = atom({
 
 export const authState = atom({
   key: 'authState',
-  default: {
-    isLoggedIn: false,
-    userInfo: null,
-  },
+  default: (function initializeState() {
+    const [isValid, decoded] = getLoginStatus();
+    return {
+      isLoggedIn: isValid,
+      userInfo: isValid ? decoded : null,
+    };
+  })(),
 });
