@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Drawer, Divider, Link, ListItem, ListItemIcon, ListItemText, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Drawer, Divider, ListItem, ListItemIcon, ListItemText, Box } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Link as RouterLink } from 'react-router-dom';
 
-export default function PageTitle({ titleText, isLoggedIn = false }) {
+export default function PageTitle({ titleText, isLoggedIn = false, userInfo = null }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
@@ -66,47 +67,32 @@ export default function PageTitle({ titleText, isLoggedIn = false }) {
         <Divider />
       </AppBar>
 
-      {isLoggedIn && <DrawerPanel drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} />}
+      {isLoggedIn && <DrawerPanel drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} userInfo={userInfo} />}
     </>
   );
 }
 
 function DrawerPanel(props) {
-  const { drawerOpen, toggleDrawer } = props;
+  const { drawerOpen, toggleDrawer, userInfo } = props;
   return (
     <Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
       <div role='presentation' onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)} style={{ width: 250, padding: '8px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            height: '48px', // Drawer 標題行高度設為 48px
-          }}
-        >
-          <Typography
-            variant='h6'
-            sx={{
-              lineHeight: '48px', // 確保文字垂直居中
-              fontSize: '1.25rem',
-            }}
-          >
-            用戶名稱
-          </Typography>
+        <ListItem sx={{ paddingLeft: 0 }}>
+          <ListItemIcon sx={{ minWidth: '35px' }}>
+            <AccountCircleIcon />
+          </ListItemIcon>
+          <ListItemText primary={<Typography sx={{ fontWeight: 'bold' }}>{userInfo.id.toUpperCase()}</Typography>} />
           <IconButton
             edge='end'
             size='small'
             sx={{
-              width: '48px',
-              height: '48px',
               padding: 0,
-              paddingRight: '8px',
             }}
             onClick={toggleDrawer(false)}
           >
             <CloseIcon />
           </IconButton>
-        </div>
+        </ListItem>
         <Divider sx={{ margin: '0' }} />
         <ListItem sx={{ paddingLeft: 0 }}>
           <ListItemIcon sx={{ minWidth: '35px' }}>
@@ -114,21 +100,12 @@ function DrawerPanel(props) {
           </ListItemIcon>
           <ListItemText
             primary={
-              <Link href='/my/setting' underline='none' sx={{ color: 'inherit' }}>
+              <RouterLink to='/my/setting' style={{ textDecoration: 'none', color: 'inherit' }}>
                 設定推播關鍵字
-              </Link>
+              </RouterLink>
             }
           />
         </ListItem>
-        {/* <ListItem sx={{ paddingLeft: 0 }}>
-          <ListItemText
-            primary={
-              <Link href='/my' underline='none' sx={{ color: 'inherit' }}>
-                MY PAGE
-              </Link>
-            }
-          />
-        </ListItem> */}
       </div>
     </Drawer>
   );

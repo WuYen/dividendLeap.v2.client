@@ -1,23 +1,8 @@
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
-
-export const getLoginStatus = () => {
-  //TODO: move user state to recoil
-  const token = localStorage.getItem('token');
-  if (!!token) {
-    const decoded = jwtDecode(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-    const isValid = decoded.exp - 86400 > currentTime;
-    console.log('exp:', decoded.exp, ', current:', currentTime, ', isValid:', isValid);
-    return [isValid, decoded];
-  } else {
-    return [false, null];
-  }
-};
 
 export default function LoginPage(props) {
   return (

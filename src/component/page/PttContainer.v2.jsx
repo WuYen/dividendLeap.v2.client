@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
 import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -11,20 +11,7 @@ import { AuthorList } from '../common/AuthorList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
 
-export default function MyPttContainer() {
-  return (
-    <DataLoader>
-      <Routes>
-        <Route path='/' element={<PostListPage />} />
-        <Route path='/posts' element={<MyPostListPage />} />
-        <Route path='/authors/rank' element={<AuthorRankPage />} />
-        <Route path='/author/:id' element={<AuthorPostsPage />} />
-      </Routes>
-    </DataLoader>
-  );
-}
-
-function PostListPage(props) {
+export function PostListPage(props) {
   const posts = useRecoilValue(postsState);
   return (
     <>
@@ -34,7 +21,7 @@ function PostListPage(props) {
   );
 }
 
-function MyPostListPage(props) {
+export function MyPostListPage(props) {
   const favorites = useRecoilValue(favoritesState);
 
   return favorites.loading ? (
@@ -47,7 +34,7 @@ function MyPostListPage(props) {
   );
 }
 
-function AuthorRankPage(props) {
+export function AuthorRankPage(props) {
   const authorsRank = useRecoilValue(authorsRankState);
   return (
     <>
@@ -57,7 +44,7 @@ function AuthorRankPage(props) {
   );
 }
 
-function AuthorPostsPage(props) {
+export function AuthorPostsPage(props) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -150,7 +137,7 @@ function TopNavTab(props) {
   );
 }
 
-const DataLoader = (props) => {
+export const DataLoader = (props) => {
   const [loading, setLoading] = useState(true);
   const setPosts = useSetRecoilState(postsState);
   const setFavorites = useSetRecoilState(favoritesState);
@@ -184,6 +171,8 @@ const DataLoader = (props) => {
         setFavorites((prev) => ({ ...prev, loading: false }));
       });
   }, [setPosts, setFavorites, setLoading, setAuthorsRank]);
+
+  console.log(`DataLoader loading:${loading}`);
 
   return loading ? <TeaLoading /> : props.children;
 };

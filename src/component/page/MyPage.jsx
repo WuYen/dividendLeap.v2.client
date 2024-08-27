@@ -1,13 +1,14 @@
 import React, { Suspense, useEffect } from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { useRecoilState, RecoilRoot } from 'recoil';
+import { Box } from '@mui/material';
 
-import { getLoginStatus } from './Login';
 import PageTitle from '../common/PageTitle';
 import TeaLoading from '../common/TeaLoading';
-import MyPttContainer from './MyPttContainer.v2';
-import { Box } from '@mui/material';
 import { authState } from '../../state/atoms';
+import { DataLoader, PostListPage, MyPostListPage, AuthorRankPage, AuthorPostsPage } from './PttContainer.v2';
+import SettingPage from './SettingPage';
+import { getLoginStatus } from '../../utility/loginHelper';
 
 export default function MyPage() {
   return (
@@ -48,14 +49,15 @@ function Container() {
   return (
     <Box sx={{ textAlign: 'center' }}>
       <PageTitle titleText={'MY PAGE'} isLoggedIn={isLoggedIn} userInfo={userInfo} />
-      {isLoggedIn ? <MyPttContainer /> : null}
-      <Routes>
-        <Route path='/setting' element={<SettingPage />} />
-      </Routes>
+      <DataLoader>
+        <Routes>
+          <Route path='/' element={<PostListPage />} />
+          <Route path='/posts' element={<MyPostListPage />} />
+          <Route path='/authors/rank' element={<AuthorRankPage />} />
+          <Route path='/author/:id' element={<AuthorPostsPage />} />
+          <Route path='/setting' element={<SettingPage />} />
+        </Routes>
+      </DataLoader>
     </Box>
   );
-}
-
-function SettingPage() {
-  return <Box sx={{ textAlign: 'center' }}>this is setting</Box>;
 }

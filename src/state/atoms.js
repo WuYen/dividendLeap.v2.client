@@ -1,6 +1,6 @@
 // atoms.js
 import { atom } from 'recoil';
-import { getLoginStatus } from '../component/page/Login';
+import { getLoginStatus } from '../utility/loginHelper';
 
 export const postsState = atom({
   key: 'postsState',
