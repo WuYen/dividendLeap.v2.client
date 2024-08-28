@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, TextField, Button, Chip } from '@mui/material';
+import { Paper, TextField, Button, Chip, Box, CircularProgress, Typography, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+import api from '../../utility/api';
 
 export default function SettingPage() {
   const navigate = useNavigate();
@@ -12,72 +14,121 @@ export default function SettingPage() {
   const [keywords, setKeywords] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true); // To handle initial loading
 
-  const handleAddKeyword = async () => {
-    if (inputValue.trim() !== '') {
+  useEffect(() => {
+    // Fetch keywords when the component mounts
+    const fetchKeywords = async () => {
       try {
-        setIsLoading(true);
-        //TODO: callAPI, then setIsLoading(false)
-        setKeywords([...keywords, inputValue]);
-        setInputValue('');
+        setIsFetching(true);
+        const response = await api.get('/keywords'); // Fetching keywords from the endpoint
+        setKeywords(response.data.data); // Assuming response.data.data contains the keywords
       } catch (error) {
-        console.error('Failed to save keyword', error);
+        console.error('Failed to fetch keywords:', error);
+      } finally {
+        setIsFetching(false);
       }
-    }
-  };
+    };
 
-  const handleDeleteKeyword = async (keywordToDelete) => {
+    fetchKeywords();
+  }, []);
+
+  const handleKeywordAction = async (action, keyword) => {
+    setIsLoading(true);
     try {
-      //TODO: callAPI
-      setKeywords(keywords.filter((keyword) => keyword !== keywordToDelete));
+      if (action === 'add' && keyword.trim() !== '') {
+        const response = await api.post('/keywords/add', { keywords: [keyword] });
+        console.log('keyword add', response);
+        setKeywords([...keywords, keyword]);
+        setInputValue('');
+      } else if (action === 'delete') {
+        const response = await api.post('/keywords/remove', { keywords: [keyword] });
+        console.log('keyword remove', response);
+        setKeywords(keywords.filter((item) => item !== keyword));
+      }
     } catch (error) {
-      console.error('Failed to delete keyword', error);
+      console.error(`Failed to ${action} keyword`, error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <Box sx={{ textAlign: 'center' }}>
-      <IconButton
-        onClick={handleBack}
-        sx={{
-          position: 'absolute',
-          left: 0,
-          border: '1px solid',
-          borderColor: 'divider',
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
-        }}
-        size='small'
-      >
-        <ArrowBackIcon fontSize='small' />
-      </IconButton>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleKeywordAction('add', inputValue);
+  };
 
-      <Box sx={{ p: 3 }}>
-        <h2>Settings</h2>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+  return isFetching ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+      <CircularProgress />
+    </Box>
+  ) : (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <Box
+        sx={{
+          maxWidth: '450px',
+          minWidth: '450px',
+          margin: '0 auto 15px',
+          position: 'relative',
+          display: 'flex',
+          height: '28px',
+        }}
+      >
+        <IconButton
+          onClick={handleBack}
+          sx={{
+            position: 'absolute',
+            left: 0,
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+          size='small'
+        >
+          <ArrowBackIcon fontSize='small' />
+        </IconButton>
+      </Box>
+      <Paper sx={{ p: 3, width: '400px' }}>
+        <Typography variant='body2' sx={{ mb: 2 }}>
+          ✏️ 請輸入並管理你的關鍵字
+        </Typography>
+        <form onSubmit={handleSubmit}>
           <TextField
-            // inputRef={inputRef}
             fullWidth
             variant='outlined'
             label='新增關鍵字'
-            name='keyword'
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
             required
             sx={{ mb: 2 }}
+            autoComplete='off'
           />
-          <Button variant='contained' onClick={handleAddKeyword}>
-            新增
-          </Button>
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Button variant='contained' fullWidth type='submit'>
+              新增關鍵字
+            </Button>
+          )}
+        </form>
+
+        <Box sx={{ mt: 2 }}>
+          {keywords.length > 0 ? (
+            keywords.map((keyword, index) => (
+              <Chip key={index} label={keyword} onDelete={() => handleKeywordAction('delete', keyword)} sx={{ mb: 1, mr: 1 }} />
+            ))
+          ) : (
+            <Typography variant='body2' color='textSecondary'>
+              暫無關鍵字
+            </Typography>
+          )}
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {keywords.map((keyword, index) => (
-            <Chip key={index} label={keyword} onDelete={() => handleDeleteKeyword(keyword)} sx={{ mb: 1 }} />
-          ))}
-        </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 }
