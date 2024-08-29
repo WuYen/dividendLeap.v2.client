@@ -21,8 +21,8 @@ export default function SettingPage() {
     const fetchKeywords = async () => {
       try {
         setIsFetching(true);
-        const response = await api.get('/keywords'); // Fetching keywords from the endpoint
-        setKeywords(response.data.data); // Assuming response.data.data contains the keywords
+        const response = await api.get('/my/keywords'); // Fetching keywords from the endpoint
+        setKeywords(response.data); // Assuming response.data.data contains the keywords
       } catch (error) {
         console.error('Failed to fetch keywords:', error);
       } finally {
@@ -37,12 +37,12 @@ export default function SettingPage() {
     setIsLoading(true);
     try {
       if (action === 'add' && keyword.trim() !== '') {
-        const response = await api.post('/keywords/add', { keywords: [keyword] });
+        const response = await api.post('/my/keywords/add', { keywords: [keyword] });
         console.log('keyword add', response);
         setKeywords([...keywords, keyword]);
         setInputValue('');
       } else if (action === 'delete') {
-        const response = await api.post('/keywords/remove', { keywords: [keyword] });
+        const response = await api.post('/my/keywords/remove', { keywords: [keyword] });
         console.log('keyword remove', response);
         setKeywords(keywords.filter((item) => item !== keyword));
       }
