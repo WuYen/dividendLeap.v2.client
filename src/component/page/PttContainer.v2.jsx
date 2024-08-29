@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
+import { useRecoilValue, useSetRecoilState, useRecoilState, selector } from 'recoil';
 import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -11,35 +11,43 @@ import { AuthorList } from '../common/AuthorList';
 import Tabs from '../common/Tabs';
 import TeaLoading from '../common/TeaLoading';
 
-export function PostListPage(props) {
-  const posts = useRecoilValue(postsState);
+const pttContainerSelector = selector({
+  key: 'pttContainerSelector',
+  get: ({ get }) => {
+    const posts = get(postsState);
+    const favorites = get(favoritesState);
+    const authorsRank = get(authorsRankState);
+
+    return { posts, favorites, authorsRank };
+  },
+});
+
+export default function PttContainer() {
+  const location = useLocation();
+  const { posts, favorites, authorsRank } = useRecoilValue(pttContainerSelector);
+
+  let content;
+  let defaultTab;
+  switch (location.pathname) {
+    case '/my/posts':
+      content = favorites.loading ? <TeaLoading /> : <PostList data={favorites.posts} mini={true} tagFilter={false} isMyPost={true} />;
+      defaultTab = 'My文章';
+      break;
+    case '/my/authors/rank':
+      content = <AuthorList data={authorsRank} />;
+      defaultTab = '作者';
+      break;
+    case '/my':
+    default:
+      content = <PostList data={posts} showSearch={true} tagFilter={false} />;
+      defaultTab = '文章';
+      break;
+  }
+
   return (
     <>
-      <TopNavTab defaultTab='文章' />
-      <PostList data={posts} showSearch={true} tagFilter={false} />
-    </>
-  );
-}
-
-export function MyPostListPage(props) {
-  const favorites = useRecoilValue(favoritesState);
-
-  return favorites.loading ? (
-    <TeaLoading />
-  ) : (
-    <>
-      <TopNavTab defaultTab='My文章' />
-      <PostList data={favorites.posts} mini={true} tagFilter={false} isMyPost={true} />
-    </>
-  );
-}
-
-export function AuthorRankPage(props) {
-  const authorsRank = useRecoilValue(authorsRankState);
-  return (
-    <>
-      <TopNavTab defaultTab='作者' />
-      <AuthorList data={authorsRank} />
+      <TopNavTab defaultTab={defaultTab} />
+      {content}
     </>
   );
 }

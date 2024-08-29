@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 import PageTitle from '../common/PageTitle';
 import TeaLoading from '../common/TeaLoading';
 import { authState } from '../../state/atoms';
-import { DataLoader, PostListPage, MyPostListPage, AuthorRankPage, AuthorPostsPage } from './PttContainer.v2';
+import PttContainer, { DataLoader, AuthorPostsPage } from './PttContainer.v2';
 import SettingPage from './SettingPage';
 import { getLoginStatus } from '../../utility/loginHelper';
 
@@ -51,9 +51,9 @@ function Container() {
       <PageTitle titleText={'MY PAGE'} isLoggedIn={isLoggedIn} userInfo={userInfo} />
       <DataLoader>
         <Routes>
-          <Route path='/' element={<PostListPage />} />
-          <Route path='/posts' element={<MyPostListPage />} />
-          <Route path='/authors/rank' element={<AuthorRankPage />} />
+          <Route path='/' element={<PttContainer />} />
+          <Route path='/posts' element={<PttContainer />} />
+          <Route path='/authors/rank' element={<PttContainer />} />
           <Route path='/author/:id' element={<AuthorPostsPage />} />
           <Route path='/setting' element={<SettingPage />} />
         </Routes>
