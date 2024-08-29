@@ -1,37 +1,63 @@
 import React, { Suspense, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { getLoginStatus } from './Login';
-import PageTitle from '../common/PageTitle';
-import TeaLoading from '../common/TeaLoading';
-import MyPttContainer from './MyPttContainer.v2';
+import { useNavigate, Routes, Route } from 'react-router-dom';
+import { useRecoilState, RecoilRoot } from 'recoil';
 import { Box } from '@mui/material';
 
+import PageTitle from '../common/PageTitle';
+import TeaLoading from '../common/TeaLoading';
+import { authState } from '../../state/atoms';
+import PttContainer, { DataLoader, AuthorPostsPage } from './PttContainer.v2';
+import SettingPage from './SettingPage';
+import { getLoginStatus } from '../../utility/loginHelper';
+
 export default function MyPage() {
-  const [isLoggedIn] = getLoginStatus();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate(`/login`, { replace: true });
-    }
-  }, [navigate, isLoggedIn]);
-
   return (
-    <Suspense fallback={<MyPagePreload />}>
-      <Box sx={{ textAlign: 'center' }}>
-        <PageTitle titleText={'MY PAGE'} />
-        {isLoggedIn ? <MyPttContainer /> : null}
-      </Box>
+    <Suspense
+      fallback={
+        <Box sx={{ textAlign: 'center' }}>
+          <PageTitle titleText={`MY PAGE`} />
+          <TeaLoading />
+        </Box>
+      }
+    >
+      <RecoilRoot>
+        <Container />
+      </RecoilRoot>
     </Suspense>
   );
 }
 
-function MyPagePreload() {
+function Container() {
+  const [{ isLoggedIn, userInfo }, setAuth] = useRecoilState(authState);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    //check again, cause after login authState won't update
+    const [loginStatus, user] = getLoginStatus();
+    if (loginStatus !== isLoggedIn) {
+      setAuth({
+        isLoggedIn: loginStatus,
+        userInfo: user,
+      });
+    }
+
+    if (!isLoggedIn && !loginStatus) {
+      navigate(`/login`, { replace: true });
+    }
+  }, [navigate, isLoggedIn, setAuth]);
+
   return (
     <Box sx={{ textAlign: 'center' }}>
-      <PageTitle titleText={`MY PAGE`} />
-      <TeaLoading />
+      <PageTitle titleText={'MY PAGE'} isLoggedIn={isLoggedIn} userInfo={userInfo} />
+      <DataLoader>
+        <Routes>
+          <Route path='/' element={<PttContainer />} />
+          <Route path='/posts' element={<PttContainer />} />
+          <Route path='/authors/rank' element={<PttContainer />} />
+          <Route path='/author/:id' element={<AuthorPostsPage />} />
+          <Route path='/setting' element={<SettingPage />} />
+        </Routes>
+      </DataLoader>
     </Box>
   );
 }
