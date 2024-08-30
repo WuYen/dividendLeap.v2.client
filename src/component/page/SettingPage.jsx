@@ -94,7 +94,12 @@ export default function SettingPage() {
           <ArrowBackIcon fontSize='small' />
         </IconButton>
       </Box>
-      <Paper sx={{ p: 3, width: '400px' }}>
+      <Paper
+        sx={{
+          p: 3,
+          width: { xs: '90%', sm: '400px' },
+        }}
+      >
         <Typography variant='body2' sx={{ mb: 2 }}>
           ✏️ 請輸入並管理你的關鍵字
         </Typography>

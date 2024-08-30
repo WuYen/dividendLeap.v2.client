@@ -42,7 +42,12 @@ function CallbackPage(props) {
 
   return (
     tokenInfoObject && (
-      <Paper sx={{ p: 3, width: '400px' }}>
+      <Paper
+        sx={{
+          p: 3,
+          width: { xs: '90%', sm: '400px' },
+        }}
+      >
         <Typography variant='body2' sx={{ mb: 2 }}>
           📢 說明: 解除通知請
           <Link href='https://help2.line.me/line_notify/web/pc?lang=zh-Hant&contentId=20003056' target='_blank' rel='noopener noreferrer'>
@@ -140,7 +145,12 @@ export function AccountForm(props) {
   const { status } = responseData || {};
 
   return (
-    <Paper sx={{ p: 3, width: '400px' }}>
+    <Paper
+      sx={{
+        p: 3,
+        width: { xs: '90%', sm: '400px' },
+      }}
+    >
       <Typography variant='body2' sx={{ mb: 2 }}>
         📢 說明: 註冊後會收到分類為 [標的] 的PTT股版PO文
       </Typography>
