@@ -8,7 +8,11 @@ import api from '../../utility/api';
 export default function SettingPage() {
   const navigate = useNavigate();
   const handleBack = () => {
-    navigate(-1);
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate(`/my`, { replace: true });
+    }
   };
 
   const [keywords, setKeywords] = useState([]);

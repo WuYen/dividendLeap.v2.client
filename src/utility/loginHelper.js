@@ -26,7 +26,8 @@ export const getLoginStatus = () => {
       console.log('exp:', decoded.exp, ', current:', currentTime, ', isValid:', isValid);
       return [isValid, decoded];
     } else {
-      throw new Error('Invalid token format');
+      console.error('invalid token', token);
+      return [false, null];
     }
   } catch (error) {
     console.error('Error verifying token:', error);
