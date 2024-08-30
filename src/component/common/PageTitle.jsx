@@ -33,19 +33,21 @@ export default function PageTitle({ titleText, isLoggedIn = false, userInfo = nu
             position: 'relative', // 使用相對定位
           }}
         >
-          <Typography
-            variant='h6'
-            component='div'
-            sx={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)', // 確保標題始終居中
-              lineHeight: '48px', // 確保文字垂直居中
+          <div
+            style={{
+              textAlign: 'center',
+              lineHeight: '48px', // 确保文字垂直居中
               fontSize: '1.25rem',
+              margin: '0 auto',
+              width: '100%',
+              position: 'absolute',
+              left: '0',
+              right: '0',
+              fontWeight: 500,
             }}
           >
             {titleText}
-          </Typography>
+          </div>
           <Box sx={{ flexGrow: 1 }} /> {/* 使用 Box 佔據左邊空間 */}
           {isLoggedIn && (
             <IconButton
