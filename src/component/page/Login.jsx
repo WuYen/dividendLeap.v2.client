@@ -53,7 +53,12 @@ export function InputAccountAndVerifyCode(props) {
   };
 
   return (
-    <Paper sx={{ p: 3, width: '400px' }}>
+    <Paper
+      sx={{
+        p: 3,
+        width: { xs: '90%', sm: '400px' },
+      }}
+    >
       {!isCodeSent ? (
         <Box>
           <Typography variant='body2' sx={{ mb: 2 }}>

@@ -6,6 +6,7 @@ import TeaLoading from '../common/TeaLoading';
 import PageTitle from '../common/PageTitle';
 import { toYYYYMMDDWithSeparator } from '../../utility/formatter';
 import { PostTabs } from '../common/Tabs';
+import { getLoginStatus } from '../../utility/loginHelper';
 
 export default function PttContainer() {
   const [data, setData] = useState([]);
@@ -16,23 +17,28 @@ export default function PttContainer() {
   const [searchParams] = useSearchParams();
   const prevPathname = useRef(location.pathname);
   const refresh = searchParams.get('refresh');
-  const url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+  const [isLoggedIn] = getLoginStatus();
 
   useEffect(() => {
-    async function fetchData() {
-      if (url) {
-        const response = await api.get(url);
-        console.log('fetch data', url, response);
-        if (response.success) {
-          setData(response.data);
-          setIsLoading(false);
-        } else {
-          navigate('/error');
+    if (isLoggedIn) {
+      navigate(`/my/author/${id}`, { replace: true });
+    } else {
+      async function fetchData() {
+        const url = `/ptt/author/${id}?refresh=${refresh === 'true'}`;
+        if (url) {
+          const response = await api.get(url);
+          console.log('fetch data', url, response);
+          if (response.success) {
+            setData(response.data);
+            setIsLoading(false);
+          } else {
+            navigate('/error');
+          }
         }
       }
+      fetchData();
     }
-    fetchData();
-  }, [url, navigate]);
+  }, [id, refresh, navigate, isLoggedIn]);
 
   useEffect(() => {
     prevPathname.current = location.pathname;

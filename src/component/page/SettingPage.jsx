@@ -8,7 +8,11 @@ import api from '../../utility/api';
 export default function SettingPage() {
   const navigate = useNavigate();
   const handleBack = () => {
-    navigate(-1);
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate(`/my`, { replace: true });
+    }
   };
 
   const [keywords, setKeywords] = useState([]);
@@ -90,7 +94,12 @@ export default function SettingPage() {
           <ArrowBackIcon fontSize='small' />
         </IconButton>
       </Box>
-      <Paper sx={{ p: 3, width: '400px' }}>
+      <Paper
+        sx={{
+          p: 3,
+          width: { xs: '90%', sm: '400px' },
+        }}
+      >
         <Typography variant='body2' sx={{ mb: 2 }}>
           ✏️ 請輸入並管理你的關鍵字
         </Typography>

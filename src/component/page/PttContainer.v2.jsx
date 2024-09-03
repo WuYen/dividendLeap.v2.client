@@ -75,7 +75,11 @@ export function AuthorPostsPage(props) {
   }, [id, searchParams, setAuthorPostsState]);
 
   const handleBack = () => {
-    navigate(-1);
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate(`/my`, { replace: true });
+    }
   };
 
   return authorPosts.length === 0 ? (
