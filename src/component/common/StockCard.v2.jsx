@@ -21,7 +21,7 @@ import StockChart from './StockChart';
 import { PriceInfoBody } from './StockCard';
 
 const openNewPage = (path) => {
-  const url = `https://www.ptt.cc/${path}`;
+  const url = `https://www.ptt.cc${path}`;
   window.open(url, '_blank');
 };
 
