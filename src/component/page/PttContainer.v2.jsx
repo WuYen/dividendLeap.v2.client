@@ -30,7 +30,11 @@ export default function PttContainer() {
   let defaultTab;
   switch (location.pathname) {
     case '/my/posts':
-      content = favorites.loading ? <TeaLoading /> : <PostList data={favorites.posts} mini={true} tagFilter={false} isMyPost={true} />;
+      content = favorites.loading ? (
+        <TeaLoading />
+      ) : (
+        <PostList key={'myPosts'} data={favorites.posts} mini={true} tagFilter={false} isMyPost={true} />
+      );
       defaultTab = 'My文章';
       break;
     case '/my/authors/rank':
@@ -39,7 +43,7 @@ export default function PttContainer() {
       break;
     case '/my':
     default:
-      content = <PostList data={posts} showSearch={true} tagFilter={false} />;
+      content = <PostList key={'posts'} data={posts} showSearch={true} tagFilter={false} />;
       defaultTab = '文章';
       break;
   }

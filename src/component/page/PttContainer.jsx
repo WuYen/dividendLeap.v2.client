@@ -58,7 +58,7 @@ export default function PttContainer() {
 function HistoryList(props) {
   const { data } = props;
   const openNewPage = (path) => {
-    const url = `https://www.ptt.cc/${path}`;
+    const url = `https://www.ptt.cc${path}`;
     window.open(url, '_blank');
   };
   const containTargetPosts = data.find((item) => item.tag === '標的');

@@ -10,7 +10,9 @@ import StockChart from './StockChart';
 import useFavorite from '../../hook/useFavoritePost';
 
 const openNewPage = (path) => {
-  const url = `https://www.ptt.cc/${path}`;
+  console.log(`open new ${path}`);
+
+  const url = `https://www.ptt.cc${path}`;
   window.open(url, '_blank');
 };
 
