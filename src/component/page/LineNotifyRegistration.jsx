@@ -16,7 +16,7 @@ export default function LineNotifyRegistration(props) {
   );
 }
 
-function CallbackPage(props) {
+function CallbackPage() {
   const location = useLocation();
   const navigate = useNavigate();
   let tokenInfoObject = null;
@@ -64,7 +64,7 @@ function CallbackPage(props) {
   );
 }
 
-export function AccountForm(props) {
+export function AccountForm() {
   const [account, setAccount] = useState({ username: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);

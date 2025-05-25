@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../utility/api';
 import PageTitle from '../common/PageTitle';
 
-export default function LoginPage(props) {
+export default function LoginPage() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <PageTitle titleText='LOGIN' />
@@ -13,7 +13,7 @@ export default function LoginPage(props) {
   );
 }
 
-export function InputAccountAndVerifyCode(props) {
+export function InputAccountAndVerifyCode() {
   const location = useLocation();
   const navigate = useNavigate();
   const [channel, setChannel] = useState('');
