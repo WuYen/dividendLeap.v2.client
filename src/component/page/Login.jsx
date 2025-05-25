@@ -62,12 +62,12 @@ export function InputAccountAndVerifyCode(props) {
       {!isCodeSent ? (
         <Box>
           <Typography variant='body2' sx={{ mb: 2 }}>
-            📢 說明: 輸入註冊Notify時輸入的名稱
+            📢 說明: 輸入註冊帳號
           </Typography>
           <TextField
             fullWidth
             variant='outlined'
-            label='輸入註冊名字'
+            label='輸入註冊帳號'
             value={channel}
             onChange={(e) => setChannel(e.target.value)}
             required
@@ -80,7 +80,7 @@ export function InputAccountAndVerifyCode(props) {
       ) : (
         <Box>
           <Typography variant='body2' sx={{ mb: 2 }}>
-            📢 說明: 輸入Line收到的驗證碼
+            📢 說明: 輸入收到的驗證碼
           </Typography>
           <TextField
             autoComplete='off'
